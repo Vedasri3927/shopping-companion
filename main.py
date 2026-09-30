@@ -1,10 +1,19 @@
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 from db import get_cached, get_history, init_db, save_results
 from serp import search_shopping
 
 app = FastAPI(title="Shopping Companion")
 init_db()
+
+# Allows the static frontend (opened as a local file or served separately) to call this API.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/search")

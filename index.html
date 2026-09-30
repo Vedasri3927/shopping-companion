@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shopping Companion</title>
+<style>
+  :root {
+    --ink: #16181c;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --paper: #fafafa;
+    --accent: #1f6f4a;
+    --accent-soft: #e8f3ee;
+    --danger: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 650;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin: 0 0 28px;
+  }
+  form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 11px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+  }
+  input[type="text"]:focus {
+    border-color: var(--accent);
+  }
+  button {
+    padding: 11px 20px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 550;
+    cursor: pointer;
+  }
+  button:disabled {
+    background: #a8b5ae;
+    cursor: default;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 18px 0 10px;
+    min-height: 22px;
+  }
+  .count {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .refresh-toggle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+  th {
+    text-align: left;
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-weight: 550;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  th.active { color: var(--ink); }
+  th .arrow { font-size: 0.7em; margin-left: 3px; }
+  td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  tr:hover td { background: #f5f5f4; }
+  .best td { background: var(--accent-soft); }
+  .prod {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 320px;
+  }
+  .prod img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: white;
+    flex-shrink: 0;
+  }
+  .prod-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+  }
+  .prod-title a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .prod-title a:hover { text-decoration: underline; }
+  .price { font-weight: 650; white-space: nowrap; }
+  .old-price {
+    color: var(--muted);
+    text-decoration: line-through;
+    font-size: 0.85em;
+    margin-left: 6px;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--accent);
+    color: white;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .rating { white-space: nowrap; color: var(--muted); }
+  .empty, .error, .loading {
+    padding: 40px 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .error { color: var(--danger); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Shopping Companion</h1>
+  <p class="sub">Search a product and compare live prices across sellers.</p>
+
+  <form id="search-form">
+    <input type="text" id="query" placeholder="e.g. boat airdopes 141" autocomplete="off" required />
+    <button type="submit" id="search-btn">Search</button>
+  </form>
+
+  <div class="row">
+    <span class="count" id="count"></span>
+    <label class="refresh-toggle">
+      <input type="checkbox" id="refresh" /> Force live refresh
+    </label>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+  // Change this if your FastAPI server runs somewhere other than localhost:8000
+  const API_BASE = "http://127.0.0.1:8000";
+
+  const form = document.getElementById("search-form");
+  const queryInput = document.getElementById("query");
+  const refreshInput = document.getElementById("refresh");
+  const searchBtn = document.getElementById("search-btn");
+  const resultsEl = document.getElementById("results");
+  const countEl = document.getElementById("count");
+
+  let currentResults = [];
+  let sortKey = "price";
+  let sortAsc = true;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    runSearch(queryInput.value.trim());
+  });
+
+  async function runSearch(q) {
+    if (!q) return;
+    searchBtn.disabled = true;
+    searchBtn.textContent = "Searching...";
+    countEl.textContent = "";
+    resultsEl.innerHTML = '<div class="loading">Fetching live prices…</div>';
+
+    const url = `${API_BASE}/search?q=${encodeURIComponent(q)}&refresh=${refreshInput.checked}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Request failed (${res.status})`);
+      }
+      const data = await res.json();
+      currentResults = data.results || [];
+      sortKey = "price";
+      sortAsc = true;
+      countEl.textContent = currentResults.length
+        ? `${currentResults.length} results · ${data.source === "cache" ? "cached" : "live"}`
+        : "";
+      render();
+    } catch (err) {
+      resultsEl.innerHTML = `<div class="error">Couldn't fetch results: ${escapeHtml(err.message)}. Is the API running at ${API_BASE}?</div>`;
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = "Search";
+    }
+  }
+
+  function sortResults() {
+    const dir = sortAsc ? 1 : -1;
+    return [...currentResults].sort((a, b) => {
+      let av = a[sortKey], bv = b[sortKey];
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (typeof av === "string") return av.localeCompare(bv) * dir;
+      return (av - bv) * dir;
+    });
+  }
+
+  function render() {
+    if (!currentResults.length) {
+      resultsEl.innerHTML = '<div class="empty">No results yet. Try a search above.</div>';
+      return;
+    }
+    const sorted = sortResults();
+    const lowestPrice = Math.min(...currentResults.map(r => r.price));
+
+    const headers = [
+      { key: "title", label: "Product" },
+      { key: "seller", label: "Seller" },
+      { key: "price", label: "Price" },
+      { key: "rating", label: "Rating" },
+    ];
+
+    const headHtml = headers.map(h => {
+      const active = h.key === sortKey;
+      const arrow = active ? (sortAsc ? "▲" : "▼") : "";
+      return `<th data-key="${h.key}" class="${active ? "active" : ""}">${h.label}<span class="arrow">${arrow}</span></th>`;
+    }).join("");
+
+    const rowsHtml = sorted.map(r => {
+      const isBest = r.price === lowestPrice;
+      const oldPrice = r.old_price ? `<span class="old-price">₹${formatPrice(r.old_price)}</span>` : "";
+      const rating = r.rating ? `${r.rating}★${r.reviews ? ` (${r.reviews})` : ""}` : "—";
+      const thumb = r.thumbnail
+        ? `<img src="${escapeAttr(r.thumbnail)}" alt="" loading="lazy" />`
+        : `<div style="width:40px;height:40px;border-radius:6px;border:1px solid var(--line);flex-shrink:0"></div>`;
+      const link = r.link || "#";
+      return `
+        <tr class="${isBest ? "best" : ""}">
+          <td>
+            <div class="prod">
+              ${thumb}
+              <div class="prod-title">
+                <a href="${escapeAttr(link)}" target="_blank" rel="noopener">${escapeHtml(r.title)}</a>
+              </div>
+            </div>
+          </td>
+          <td>${escapeHtml(r.seller || "—")}</td>
+          <td class="price">₹${formatPrice(r.price)}${oldPrice}${isBest ? '<span class="badge">Lowest</span>' : ""}</td>
+          <td class="rating">${rating}</td>
+        </tr>`;
+    }).join("");
+
+    resultsEl.innerHTML = `
+      <table>
+        <thead><tr>${headHtml}</tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>`;
+
+    resultsEl.querySelectorAll("th[data-key]").forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.key;
+        if (sortKey === key) sortAsc = !sortAsc;
+        else { sortKey = key; sortAsc = true; }
+        render();
+      });
+    });
+  }
+
+  function formatPrice(n) {
+    return Number(n).toLocaleString("en-IN");
+  }
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function escapeAttr(s) {
+    return escapeHtml(s);
+  }
+</script>
+</body>
+</html>

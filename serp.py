@@ -1,5 +1,6 @@
 import hashlib
 import os
+import re
 
 import requests
 from dotenv import load_dotenv
@@ -7,6 +8,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SERPAPI_URL = "https://serpapi.com/search.json"
+
+# Common filler words that shouldn't count when checking if a result matches the query.
+_STOPWORDS = {
+    "for", "with", "the", "a", "an", "and", "or", "of", "in", "on",
+    "men", "women", "kids", "new", "best", "buy",
+}
+# Below this fraction of matching significant words, a result is considered a mismatch.
+_RELEVANCE_THRESHOLD = 0.5
+
+# Titles containing these words are accessories/parts for a product, not the product
+# itself (a "boat airdopes 141" search shouldn't be dominated by cases for it).
+_ACCESSORY_WORDS = {
+    "case", "cover", "skin", "strap", "sticker", "protector", "pouch",
+    "holder", "charger", "cable", "adapter", "mount", "tempered",
+    "screenguard", "screen", "band", "belt", "pendrive", "spare",
+    "replacement", "repair", "kit", "cleaning", "cleaner", "tips",
+    "eartips", "earbuds tips", "silicone", "compatible",
+}
 
 
 def _product_id(item: dict) -> str:
@@ -17,8 +36,39 @@ def _product_id(item: dict) -> str:
     return "t_" + hashlib.md5(title.encode()).hexdigest()[:12]
 
 
+def _significant_words(text: str) -> set[str]:
+    words = re.findall(r"[a-z0-9]+", text.lower())
+    return {w for w in words if w not in _STOPWORDS and len(w) > 1}
+
+
+def _relevance(query_words: set[str], title: str) -> float:
+    """Fraction of the query's significant words that appear in the result title."""
+    if not query_words:
+        return 1.0
+    title_words = _significant_words(title)
+    matched = query_words & title_words
+    return len(matched) / len(query_words)
+
+
+def _is_accessory(query_words: set[str], title: str) -> bool:
+    """True if this looks like an accessory/part FOR the product, not the product itself.
+
+    Heuristic: the title contains an accessory word (case, cover, strap, etc.)
+    that the user did NOT type themselves (so searching "phone case" still
+    works normally). If the user searched for the actual device, listings
+    for its accessories are treated as a mismatch and filtered out.
+    """
+    title_words = _significant_words(title)
+    accessory_hit = title_words & _ACCESSORY_WORDS
+    if not accessory_hit or accessory_hit & query_words:
+        # No accessory word, or the user was actually searching for one
+        # (e.g. they typed "case" or "cover" themselves) -> not a mismatch.
+        return False
+    return True
+
+
 def search_shopping(query: str, limit: int = 20) -> list[dict]:
-    """Search Google Shopping (India) via SerpApi and return cleaned results."""
+    """Search Google Shopping (India) via SerpApi and return cleaned, relevance-filtered results."""
     key = os.getenv("SERPAPI_KEY")
     if not key:
         raise RuntimeError("SERPAPI_KEY is not set. Copy .env.example to .env and add your key.")
@@ -37,15 +87,20 @@ def search_shopping(query: str, limit: int = 20) -> list[dict]:
     if data.get("error"):
         raise RuntimeError(f"SerpApi error: {data['error']}")
 
+    query_words = _significant_words(query)
+
     results = []
-    for it in data.get("shopping_results", [])[:limit]:
+    for it in data.get("shopping_results", []):
         price = it.get("extracted_price")
-        if price is None or not it.get("title"):
+        title = it.get("title")
+        if price is None or not title:
             continue
+        title = title.strip()
+        score = _relevance(query_words, title)
         results.append(
             {
                 "product_id": _product_id(it),
-                "title": it["title"].strip(),
+                "title": title,
                 "seller": it.get("source"),
                 "price": float(price),
                 "old_price": it.get("extracted_old_price"),
@@ -53,6 +108,21 @@ def search_shopping(query: str, limit: int = 20) -> list[dict]:
                 "reviews": it.get("reviews"),
                 "link": it.get("product_link") or it.get("link"),
                 "thumbnail": it.get("thumbnail"),
+                "relevance": round(score, 2),
+                "is_accessory": _is_accessory(query_words, title),
             }
         )
-    return sorted(results, key=lambda r: r["price"])
+
+    # Filter in two stages, each with a safety fallback so a narrow query
+    # never returns an empty page:
+    # 1. Drop results that don't plausibly match the query's words at all.
+    relevant = [r for r in results if r["relevance"] >= _RELEVANCE_THRESHOLD]
+    pool = relevant if relevant else results
+
+    # 2. Among relevant results, prefer the actual product over its
+    # accessories (cases, straps, chargers...). Only apply this if it still
+    # leaves something to show.
+    non_accessory = [r for r in pool if not r["is_accessory"]]
+    pool = non_accessory if non_accessory else pool
+
+    return sorted(pool, key=lambda r: r["price"])[:limit]
