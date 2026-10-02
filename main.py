@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from db import get_cached, get_history, init_db, save_results
+from scoring import score_results
 from serp import search_shopping
 
 app = FastAPI(title="Shopping Companion")
@@ -22,12 +23,14 @@ def search(q: str = Query(..., min_length=2), refresh: bool = False):
     if not refresh:
         cached = get_cached(q)
         if cached:
+            score_results(q, cached, record=False)  # cache hits must not add duplicate history
             return {"query": q, "source": "cache", "count": len(cached), "results": cached}
     try:
         items = search_shopping(q)
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
     save_results(q, items)
+    score_results(q, items)  # adds buy_score, deal_verdict, deal_reason, score_breakdown
     return {"query": q, "source": "live", "count": len(items), "results": items}
 
 

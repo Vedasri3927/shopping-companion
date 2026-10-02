@@ -22,7 +22,7 @@
     color: var(--ink);
   }
   .wrap {
-    max-width: 880px;
+    max-width: 1040px;
     margin: 0 auto;
     padding: 40px 20px 80px;
   }
@@ -156,6 +156,23 @@
     vertical-align: middle;
   }
   .rating { white-space: nowrap; color: var(--muted); }
+  .score {
+    display: inline-block; min-width: 38px; text-align: center;
+    font-weight: 700; padding: 4px 8px; border-radius: 8px; cursor: help;
+  }
+  .score.hi { background: #e8f3ee; color: #1f6f4a; }
+  .score.mid { background: #fdf3dc; color: #8a5a00; }
+  .score.lo { background: #fbe9e7; color: #b3261e; }
+  .verdict { font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .v-genuine-deal, .v-below-typical-price { background: #e8f3ee; color: #1f6f4a; }
+  .v-fair-price { background: #eef0f2; color: #4b5563; }
+  .v-above-typical-price { background: #fdf3dc; color: #8a5a00; }
+  .v-inflated-discount, .v-suspiciously-low { background: #fbe9e7; color: #b3261e; }
+  .v-refurbished-used { background: #fdf3dc; color: #8a5a00; }
+  .v-pack-size-unclear, .v-not-comparable { background: #fdf3dc; color: #8a5a00; }
+  .v-not-enough-data { background: #eef0f2; color: #6b7280; }
+  .reason { font-size: 0.78rem; color: var(--muted); margin-top: 4px; max-width: 230px; line-height: 1.3; }
+  .note { font-size: 0.78rem; color: var(--muted); margin-top: 14px; }
   .empty, .error, .loading {
     padding: 40px 10px;
     text-align: center;
@@ -260,22 +277,31 @@
       { key: "seller", label: "Seller" },
       { key: "price", label: "Price" },
       { key: "rating", label: "Rating" },
+      { key: "buy_score", label: "Buy Score" },
+      { key: "deal_verdict", label: "Deal check", nosort: true },
     ];
 
     const headHtml = headers.map(h => {
       const active = h.key === sortKey;
       const arrow = active ? (sortAsc ? "▲" : "▼") : "";
+      if (h.nosort) return `<th style="cursor:default">${h.label}</th>`;
       return `<th data-key="${h.key}" class="${active ? "active" : ""}">${h.label}<span class="arrow">${arrow}</span></th>`;
     }).join("");
 
     const rowsHtml = sorted.map(r => {
       const isBest = r.price === lowestPrice;
-      const oldPrice = r.old_price ? `<span class="old-price">₹${formatPrice(r.old_price)}</span>` : "";
+      const oldPrice = (r.old_price && r.old_price > r.price) ? `<span class="old-price">₹${formatPrice(r.old_price)}</span>` : "";
       const rating = r.rating ? `${r.rating}★${r.reviews ? ` (${r.reviews})` : ""}` : "—";
       const thumb = r.thumbnail
         ? `<img src="${escapeAttr(r.thumbnail)}" alt="" loading="lazy" />`
         : `<div style="width:40px;height:40px;border-radius:6px;border:1px solid var(--line);flex-shrink:0"></div>`;
       const link = r.link || "#";
+      const scoreCell = r.buy_score == null
+        ? '<span class="rating">—</span>'
+        : `<span class="score ${scoreClass(r.buy_score)}" title="${escapeAttr(breakdownText(r))}">${r.buy_score}</span>`;
+      const verdictCell = r.deal_verdict
+        ? `<span class="verdict v-${slug(r.deal_verdict)}">${escapeHtml(r.deal_verdict)}</span><div class="reason">${escapeHtml(r.deal_reason || "")}</div>${r.warranty ? `<div class="reason">🛡 ${escapeHtml(r.warranty)}</div>` : ""}`
+        : "—";
       return `
         <tr class="${isBest ? "best" : ""}">
           <td>
@@ -287,8 +313,10 @@
             </div>
           </td>
           <td>${escapeHtml(r.seller || "—")}</td>
-          <td class="price">₹${formatPrice(r.price)}${oldPrice}${isBest ? '<span class="badge">Lowest</span>' : ""}</td>
+          <td class="price">₹${formatPrice(r.price)}${oldPrice}${isBest ? '<span class="badge">Lowest</span>' : ""}${r.unit_price_label ? `<div class="reason">${escapeHtml(r.unit_price_label)}</div>` : ""}</td>
           <td class="rating">${rating}</td>
+          <td>${scoreCell}</td>
+          <td>${verdictCell}</td>
         </tr>`;
     }).join("");
 
@@ -296,18 +324,26 @@
       <table>
         <thead><tr>${headHtml}</tr></thead>
         <tbody>${rowsHtml}</tbody>
-      </table>`;
+      </table>
+      <p class="note">Buy Score combines price history, price vs other sellers, star rating, number of reviews, warranty (only if the listing mentions it) and seller trust. Missing data is left out, not guessed. "Typical price" is a median of similar listings and may include related models. Hover a score for its breakdown.</p>`;
 
     resultsEl.querySelectorAll("th[data-key]").forEach(th => {
       th.addEventListener("click", () => {
         const key = th.dataset.key;
         if (sortKey === key) sortAsc = !sortAsc;
-        else { sortKey = key; sortAsc = true; }
+        else { sortKey = key; sortAsc = key !== "buy_score"; }
         render();
       });
     });
   }
 
+  function scoreClass(n) { return n >= 70 ? "hi" : n >= 45 ? "mid" : "lo"; }
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-z]+/g, "-"); }
+  function breakdownText(r) {
+    const b = r.score_breakdown || {};
+    const names = { history: "Price history", spread: "Price vs sellers", rating: "Rating", reviews: "Review count", warranty: "Warranty", seller: "Seller trust" };
+    return Object.keys(names).map(k => `${names[k]}: ${b[k] == null ? "n/a" : b[k]}`).join(" · ");
+  }
   function formatPrice(n) {
     return Number(n).toLocaleString("en-IN");
   }
