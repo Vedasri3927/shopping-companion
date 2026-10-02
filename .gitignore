@@ -1,4 +1,5 @@
-.env
-shopping.db
-__pycache__/
+price_history.db
 venv/
+__pycache__/
+.env
+*.db
