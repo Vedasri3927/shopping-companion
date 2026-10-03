@@ -21,139 +21,60 @@
     background: var(--paper);
     color: var(--ink);
   }
-  .wrap {
-    max-width: 1040px;
-    margin: 0 auto;
-    padding: 40px 20px 80px;
-  }
-  h1 {
-    font-size: 1.5rem;
-    font-weight: 650;
-    margin: 0 0 4px;
-    letter-spacing: -0.01em;
-  }
-  .sub {
-    color: var(--muted);
-    font-size: 0.92rem;
-    margin: 0 0 28px;
-  }
-  form {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 80px; }
+  h1 { font-size: 1.5rem; font-weight: 650; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 0.92rem; margin: 0 0 28px; }
+  form { display: flex; gap: 8px; margin-bottom: 8px; }
   input[type="text"] {
-    flex: 1;
-    padding: 11px 14px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    font-size: 0.95rem;
-    outline: none;
+    flex: 1; padding: 11px 14px; border: 1px solid var(--line);
+    border-radius: 8px; font-size: 0.95rem; outline: none;
   }
-  input[type="text"]:focus {
-    border-color: var(--accent);
-  }
+  input[type="text"]:focus { border-color: var(--accent); }
   button {
-    padding: 11px 20px;
-    border: none;
-    border-radius: 8px;
-    background: var(--accent);
-    color: white;
-    font-size: 0.95rem;
-    font-weight: 550;
-    cursor: pointer;
+    padding: 11px 20px; border: none; border-radius: 8px; background: var(--accent);
+    color: white; font-size: 0.95rem; font-weight: 550; cursor: pointer;
   }
-  button:disabled {
-    background: #a8b5ae;
-    cursor: default;
+  button:disabled { background: #a8b5ae; cursor: default; }
+  button.small { padding: 6px 12px; font-size: 0.82rem; }
+  button.ghost { background: none; color: var(--muted); padding: 4px 8px; font-size: 0.82rem; }
+  button.ghost:hover { color: var(--danger); }
+  .star {
+    background: none; color: #b8bcc4; padding: 0 6px 0 0; font-size: 1.25rem;
+    line-height: 1; flex-shrink: 0;
   }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 18px 0 10px;
-    min-height: 22px;
-  }
-  .count {
-    font-size: 0.85rem;
-    color: var(--muted);
-  }
+  .star.on { color: #d99a00; }
+  .row { display: flex; justify-content: space-between; align-items: center; margin: 18px 0 10px; min-height: 22px; }
+  .count { font-size: 0.85rem; color: var(--muted); }
   .refresh-toggle {
-    font-size: 0.85rem;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    user-select: none;
+    font-size: 0.85rem; color: var(--muted); display: flex; align-items: center;
+    gap: 6px; cursor: pointer; user-select: none;
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.92rem;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
   th {
-    text-align: left;
-    padding: 10px 10px;
-    border-bottom: 1px solid var(--line);
-    color: var(--muted);
-    font-weight: 550;
-    cursor: pointer;
-    white-space: nowrap;
+    text-align: left; padding: 10px 10px; border-bottom: 1px solid var(--line);
+    color: var(--muted); font-weight: 550; cursor: pointer; white-space: nowrap;
   }
   th.active { color: var(--ink); }
   th .arrow { font-size: 0.7em; margin-left: 3px; }
-  td {
-    padding: 12px 10px;
-    border-bottom: 1px solid var(--line);
-    vertical-align: middle;
-  }
+  td { padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
   tr:hover td { background: #f5f5f4; }
   .best td { background: var(--accent-soft); }
-  .prod {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    max-width: 320px;
-  }
+  .prod { display: flex; align-items: center; gap: 10px; max-width: 340px; }
   .prod img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    border-radius: 6px;
-    border: 1px solid var(--line);
-    background: white;
-    flex-shrink: 0;
+    width: 40px; height: 40px; object-fit: contain; border-radius: 6px;
+    border: 1px solid var(--line); background: white; flex-shrink: 0;
   }
   .prod-title {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; line-height: 1.3;
   }
-  .prod-title a {
-    color: var(--ink);
-    text-decoration: none;
-  }
+  .prod-title a { color: var(--ink); text-decoration: none; }
   .prod-title a:hover { text-decoration: underline; }
   .price { font-weight: 650; white-space: nowrap; }
-  .old-price {
-    color: var(--muted);
-    text-decoration: line-through;
-    font-size: 0.85em;
-    margin-left: 6px;
-  }
+  .old-price { color: var(--muted); text-decoration: line-through; font-size: 0.85em; margin-left: 6px; }
   .badge {
-    display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 20px;
-    background: var(--accent);
-    color: white;
-    margin-left: 8px;
-    vertical-align: middle;
+    display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 7px;
+    border-radius: 20px; background: var(--accent); color: white; margin-left: 8px; vertical-align: middle;
   }
   .rating { white-space: nowrap; color: var(--muted); }
   .score {
@@ -173,13 +94,13 @@
   .v-not-enough-data { background: #eef0f2; color: #6b7280; }
   .reason { font-size: 0.78rem; color: var(--muted); margin-top: 4px; max-width: 230px; line-height: 1.3; }
   .note { font-size: 0.78rem; color: var(--muted); margin-top: 14px; }
-  .empty, .error, .loading {
-    padding: 40px 10px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.92rem;
-  }
+  .empty, .error, .loading { padding: 40px 10px; text-align: center; color: var(--muted); font-size: 0.92rem; }
   .error { color: var(--danger); }
+  #wishlist-section { margin: 8px 0 28px; padding: 4px 16px 12px; background: white; border: 1px solid var(--line); border-radius: 10px; }
+  #wishlist-section h2 { font-size: 1rem; margin: 0; }
+  .target { width: 110px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 0.88rem; }
+  .hit { background: #e8f3ee; color: #1f6f4a; }
+  .drop { color: #1f6f4a; font-size: 0.82rem; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -199,6 +120,14 @@
     </label>
   </div>
 
+  <section id="wishlist-section" hidden>
+    <div class="row">
+      <h2>★ Wishlist</h2>
+      <button class="small" id="check-drops" type="button">Check for price drops</button>
+    </div>
+    <div id="wishlist"></div>
+  </section>
+
   <div id="results"></div>
 </div>
 
@@ -212,10 +141,26 @@
   const searchBtn = document.getElementById("search-btn");
   const resultsEl = document.getElementById("results");
   const countEl = document.getElementById("count");
+  const wishSection = document.getElementById("wishlist-section");
+  const wishEl = document.getElementById("wishlist");
+  const checkBtn = document.getElementById("check-drops");
 
   let currentResults = [];
-  let sortKey = "price";
-  let sortAsc = true;
+  let wishlist = [];
+  let sortChain = []; // e.g. [{key:"price", asc:true}, {key:"buy_score", asc:false}]; empty = price low to high
+  const DESC_FIRST = new Set(["buy_score", "rating"]); // higher is better, so first click sorts high to low
+
+  async function api(path, opts) {
+    const res = await fetch(API_BASE + path, opts);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const detail = typeof body.detail === "string" ? body.detail : "Invalid value";
+      throw new Error(detail || `Request failed (${res.status})`);
+    }
+    return res.json();
+  }
+  const jsonPost = (path, data) =>
+    api(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -228,23 +173,15 @@
     searchBtn.textContent = "Searching...";
     countEl.textContent = "";
     resultsEl.innerHTML = '<div class="loading">Fetching live prices…</div>';
-
-    const url = `${API_BASE}/search?q=${encodeURIComponent(q)}&refresh=${refreshInput.checked}`;
-
     try {
-      const res = await fetch(url);
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || `Request failed (${res.status})`);
-      }
-      const data = await res.json();
+      const data = await api(`/search?q=${encodeURIComponent(q)}&refresh=${refreshInput.checked}`);
       currentResults = data.results || [];
-      sortKey = "price";
-      sortAsc = true;
+      sortChain = [];
       countEl.textContent = currentResults.length
         ? `${currentResults.length} results · ${data.source === "cache" ? "cached" : "live"}`
         : "";
       render();
+      loadWishlist(); // prices may have changed
     } catch (err) {
       resultsEl.innerHTML = `<div class="error">Couldn't fetch results: ${escapeHtml(err.message)}. Is the API running at ${API_BASE}?</div>`;
     } finally {
@@ -254,14 +191,27 @@
   }
 
   function sortResults() {
-    const dir = sortAsc ? 1 : -1;
+    const chain = sortChain.length ? sortChain : [{ key: "price", asc: true }];
     return [...currentResults].sort((a, b) => {
-      let av = a[sortKey], bv = b[sortKey];
-      if (av == null) return 1;
-      if (bv == null) return -1;
-      if (typeof av === "string") return av.localeCompare(bv) * dir;
-      return (av - bv) * dir;
+      for (const { key, asc } of chain) {
+        const av = a[key], bv = b[key];
+        if (av == null && bv == null) continue;
+        if (av == null) return 1;   // missing values always go last
+        if (bv == null) return -1;
+        const c = typeof av === "string" ? av.localeCompare(bv) : av - bv;
+        if (c !== 0) return asc ? c : -c;
+      }
+      return 0;
     });
+  }
+
+  // Click a header: add it to the sort (first click), flip its direction (second), remove it (third).
+  function cycleSort(key) {
+    const i = sortChain.findIndex(s => s.key === key);
+    if (i === -1) sortChain.push({ key, asc: !DESC_FIRST.has(key) });
+    else if (sortChain[i].asc === !DESC_FIRST.has(key)) sortChain[i].asc = !sortChain[i].asc;
+    else sortChain.splice(i, 1);
+    render();
   }
 
   function render() {
@@ -271,6 +221,7 @@
     }
     const sorted = sortResults();
     const lowestPrice = Math.min(...currentResults.map(r => r.price));
+    const saved = new Set(wishlist.map(w => w.product_id));
 
     const headers = [
       { key: "title", label: "Product" },
@@ -282,8 +233,9 @@
     ];
 
     const headHtml = headers.map(h => {
-      const active = h.key === sortKey;
-      const arrow = active ? (sortAsc ? "▲" : "▼") : "";
+      const pos = sortChain.findIndex(s => s.key === h.key);
+      const active = pos !== -1;
+      const arrow = active ? (sortChain[pos].asc ? "▲" : "▼") + (sortChain.length > 1 ? pos + 1 : "") : "";
       if (h.nosort) return `<th style="cursor:default">${h.label}</th>`;
       return `<th data-key="${h.key}" class="${active ? "active" : ""}">${h.label}<span class="arrow">${arrow}</span></th>`;
     }).join("");
@@ -296,6 +248,8 @@
         ? `<img src="${escapeAttr(r.thumbnail)}" alt="" loading="lazy" />`
         : `<div style="width:40px;height:40px;border-radius:6px;border:1px solid var(--line);flex-shrink:0"></div>`;
       const link = r.link || "#";
+      const on = saved.has(r.product_id);
+      const star = `<button type="button" class="star ${on ? "on" : ""}" data-pid="${escapeAttr(r.product_id)}" title="${on ? "Remove from wishlist" : "Add to wishlist"}">${on ? "★" : "☆"}</button>`;
       const scoreCell = r.buy_score == null
         ? '<span class="rating">—</span>'
         : `<span class="score ${scoreClass(r.buy_score)}" title="${escapeAttr(breakdownText(r))}">${r.buy_score}</span>`;
@@ -306,6 +260,7 @@
         <tr class="${isBest ? "best" : ""}">
           <td>
             <div class="prod">
+              ${star}
               ${thumb}
               <div class="prod-title">
                 <a href="${escapeAttr(link)}" target="_blank" rel="noopener">${escapeHtml(r.title)}</a>
@@ -325,18 +280,91 @@
         <thead><tr>${headHtml}</tr></thead>
         <tbody>${rowsHtml}</tbody>
       </table>
-      <p class="note">Buy Score combines price history, price vs other sellers, star rating, number of reviews, warranty (only if the listing mentions it) and seller trust. Missing data is left out, not guessed. "Typical price" is a median of similar listings and may include related models. Hover a score for its breakdown.</p>`;
+      <p class="note">Buy Score combines price history, price vs other sellers, star rating, number of reviews, warranty (only if the listing mentions it) and seller trust. Missing data is left out, not guessed. "Typical price" is a median of similar listings and may include related models. Hover a score for its breakdown. Sorting: click column headers in order to sort by several columns (1 = main sort, 2 = tiebreaker). Click a header again to flip it, a third time to remove it.</p>`;
 
     resultsEl.querySelectorAll("th[data-key]").forEach(th => {
-      th.addEventListener("click", () => {
-        const key = th.dataset.key;
-        if (sortKey === key) sortAsc = !sortAsc;
-        else { sortKey = key; sortAsc = key !== "buy_score"; }
-        render();
-      });
+      th.addEventListener("click", () => cycleSort(th.dataset.key));
     });
   }
 
+  // ---------------------------------------------------------------- wishlist
+  async function loadWishlist() {
+    try { wishlist = (await api("/wishlist")).items; } catch (e) { wishlist = []; }
+    renderWishlist();
+    if (currentResults.length) render(); // refresh star states
+  }
+
+  function renderWishlist() {
+    wishSection.hidden = !wishlist.length;
+    if (!wishlist.length) return;
+    const rows = wishlist.map(w => {
+      const status = w.target_hit
+        ? '<span class="verdict hit">Target reached</span>'
+        : w.dropped_by > 0 ? `<span class="drop">↓ ₹${formatPrice(w.dropped_by)} since saved</span>` : "—";
+      const thumb = w.thumbnail ? `<img src="${escapeAttr(w.thumbnail)}" alt="" loading="lazy" />` : "";
+      const now = w.current_price == null ? "—" : `₹${formatPrice(w.current_price)}`;
+      return `
+        <tr>
+          <td><div class="prod">${thumb}<div class="prod-title"><a href="${escapeAttr(w.link || "#")}" target="_blank" rel="noopener">${escapeHtml(w.title)}</a></div></div></td>
+          <td class="price">${now}${w.seller ? `<div class="reason">${escapeHtml(w.seller)}</div>` : ""}</td>
+          <td><input class="target" type="number" min="1" placeholder="₹ target" data-pid="${escapeAttr(w.product_id)}" value="${w.target_price ?? ""}" /></td>
+          <td>${status}</td>
+          <td><button type="button" class="ghost remove" data-pid="${escapeAttr(w.product_id)}">Remove</button></td>
+        </tr>`;
+    }).join("");
+    wishEl.innerHTML = `
+      <table>
+        <thead><tr>
+          <th style="cursor:default">Product</th><th style="cursor:default">Now</th>
+          <th style="cursor:default">Target price</th><th style="cursor:default">Status</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="note">Prices update whenever you search or run "Check for price drops" (which re-runs your saved searches live and uses SerpApi credits).</p>`;
+  }
+
+  async function toggleStar(pid) {
+    try {
+      if (wishlist.some(w => w.product_id === pid)) await api(`/wishlist/${encodeURIComponent(pid)}`, { method: "DELETE" });
+      else await jsonPost("/wishlist", { product_id: pid });
+      await loadWishlist();
+    } catch (err) { alert(err.message); }
+  }
+
+  resultsEl.addEventListener("click", (e) => {
+    const b = e.target.closest(".star");
+    if (b) toggleStar(b.dataset.pid);
+  });
+  wishEl.addEventListener("click", (e) => {
+    const b = e.target.closest(".remove");
+    if (b) toggleStar(b.dataset.pid);
+  });
+  wishEl.addEventListener("change", async (e) => {
+    const inp = e.target.closest(".target");
+    if (!inp) return;
+    try {
+      await jsonPost("/wishlist", { product_id: inp.dataset.pid, target_price: inp.value === "" ? null : Number(inp.value) });
+      await loadWishlist();
+    } catch (err) { alert(err.message); }
+  });
+
+  checkBtn.addEventListener("click", async () => {
+    const queries = [...new Set(wishlist.map(w => w.query).filter(Boolean))];
+    if (!queries.length) return;
+    if (!confirm(`This runs ${queries.length} live search${queries.length > 1 ? "es" : ""} and uses SerpApi credits. Continue?`)) return;
+    checkBtn.disabled = true;
+    try {
+      for (let i = 0; i < queries.length; i++) {
+        checkBtn.textContent = `Checking ${i + 1}/${queries.length}…`;
+        await api(`/search?q=${encodeURIComponent(queries[i])}&refresh=true`);
+      }
+      await loadWishlist();
+    } catch (err) { alert(err.message); }
+    checkBtn.disabled = false;
+    checkBtn.textContent = "Check for price drops";
+  });
+
+  // ---------------------------------------------------------------- helpers
   function scoreClass(n) { return n >= 70 ? "hi" : n >= 45 ? "mid" : "lo"; }
   function slug(s) { return String(s).toLowerCase().replace(/[^a-z]+/g, "-"); }
   function breakdownText(r) {
@@ -344,15 +372,13 @@
     const names = { history: "Price history", spread: "Price vs sellers", rating: "Rating", reviews: "Review count", warranty: "Warranty", seller: "Seller trust" };
     return Object.keys(names).map(k => `${names[k]}: ${b[k] == null ? "n/a" : b[k]}`).join(" · ");
   }
-  function formatPrice(n) {
-    return Number(n).toLocaleString("en-IN");
-  }
+  function formatPrice(n) { return Math.round(Number(n)).toLocaleString("en-IN"); }
   function escapeHtml(s) {
     return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
-  function escapeAttr(s) {
-    return escapeHtml(s);
-  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  loadWishlist();
 </script>
 </body>
 </html>
