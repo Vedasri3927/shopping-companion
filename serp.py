@@ -10,7 +10,7 @@ load_dotenv()
 SERPAPI_URL = "https://serpapi.com/search.json"
 
 _STOPWORDS = {
-    "for", "with", "the", "a", "an", "and", "or", "of", "in", "on",
+    "for", "with", "the", "a", "an", "and", "or", "of", "in", "on", "by",
     "men", "women", "kids", "new", "best", "buy",
     "size", "xs", "xl", "xxl", "small", "medium", "large",
     "under", "below", "above", "upto", "price", "online", "india", "cheap",
@@ -58,8 +58,33 @@ _BRAND_WORDS_RAW = {
     "haier", "godrej", "bajaj", "philips", "panasonic", "infinix", "tecno",
     "iqoo", "motorola", "nokia", "honor", "google", "pixel", "micromax",
     "lava", "itel", "mi", "gigabyte", "hcl", "zebronics", "croma", "toshiba",
+    # product-line words that function as a de-facto brand/identity in how
+    # people actually search, even though they're not the company name --
+    # "iphone" implies Apple, and typing it should lock out other brands
+    # AND (via the word-based model lock) require exact variant words like
+    # "pro"/"max" to actually be present, not just "iphone 18".
+    "iphone", "galaxy", "macbook", "ipad", "airpods",
 }
 _BRAND_WORDS = {_stem(w) for w in _BRAND_WORDS_RAW}
+
+# Generic category/descriptor words that should NOT be treated as a specific
+# model/collection name, even when they survive to this point. Without this
+# list, a word-based model-lock would also force words like "gaming" or
+# "wireless" to be mandatory, which is too strict for how real titles vary.
+_CATEGORY_WORDS_RAW = {
+    "watch", "watches", "laptop", "laptops", "phone", "phones", "mobile",
+    "smartphone", "earbuds", "earbud", "earphone", "earphones", "headphone",
+    "headphones", "shoe", "shoes", "sneaker", "sneakers", "jean", "jeans",
+    "dress", "dresses", "pant", "pants", "trouser", "trousers", "shirt",
+    "shirts", "tshirt", "tee", "jacket", "jackets", "bag", "bags",
+    "backpack", "wallet", "ring", "necklace", "bracelet", "laptop",
+    "gaming", "wireless", "bluetooth", "smart", "analog", "digital",
+    "quartz", "automatic", "casual", "formal", "sports", "running",
+    "cotton", "leather", "regular", "slim", "loose", "relaxed", "fit",
+    "style", "stylish", "trendy", "fashion", "edition", "series",
+    "collection", "set", "pack", "combo",
+}
+_CATEGORY_WORDS = {_stem(w) for w in _CATEGORY_WORDS_RAW}
 
 # Sellers that exclusively sell phone/device accessories. A listing from one
 # of these is almost never the actual device, even if its product-line name
@@ -107,11 +132,28 @@ def _is_accessory(query_words: set[str], title: str, seller: str = "") -> bool:
     return True
 
 
-def _model_tokens(query_words: set[str]) -> set[str]:
-    """Words from the query that look like a model code (contain a digit),
-    e.g. 'a15', '141', '18'. If the user named a specific model, listings
-    for a different model shouldn't count as a match even if other words overlap."""
-    return {w for w in query_words if any(ch.isdigit() for ch in w)}
+def _model_tokens(query_words: set[str], brand_tokens: set[str]) -> set[str]:
+    """Words that likely name a specific model/collection rather than
+    describing the product generically.
+
+    Always included: digit-containing codes like 'a15' or '141' -- these
+    are unambiguous regardless of whether a brand was named.
+
+    Only when a brand WAS named: any other leftover word that isn't the
+    brand itself and isn't a generic category/descriptor (e.g. 'raga' in
+    'raga by titan', or 'tuf' in 'asus tuf a15'). This is scoped to
+    brand-qualified queries on purpose -- applying it to a plain descriptive
+    search like 'relaxed fit jeans for men' (no brand named) would wrongly
+    force every one of those adjectives to appear verbatim in the title.
+    """
+    digits = {w for w in query_words if any(ch.isdigit() for ch in w)}
+    extra = set()
+    if brand_tokens:
+        extra = {
+            w for w in query_words
+            if w not in brand_tokens and w not in _CATEGORY_WORDS and w not in digits
+        }
+    return digits | extra
 
 
 def _brand_tokens(query_words: set[str]) -> set[str]:
@@ -176,8 +218,8 @@ def search_shopping(query: str, limit: int = 20) -> list[dict]:
     if cap:
         max_price = float(cap.group(1).replace(",", ""))
     query_words = _significant_words(re.sub(r"\b(?:under|below|upto|up to)\s*(?:rs\.?|₹)?\s*\d[\d,]*", " ", query, flags=re.I))
-    model_tokens = _model_tokens(query_words)
     brand_tokens = _brand_tokens(query_words)
+    model_tokens = _model_tokens(query_words, brand_tokens)
 
     results = []
     for it in data.get("shopping_results", []):
@@ -192,7 +234,10 @@ def search_shopping(query: str, limit: int = 20) -> list[dict]:
         if old is None or float(old) <= float(price):
             old = None
         title_words = _significant_words(title)
-        model_match = (not model_tokens) or bool(model_tokens & title_words)
+        # ALL named model/collection words must appear, not just one -- if
+        # someone named both "tuf" and "a15", a listing with only "tuf" is
+        # a different model (e.g. the A18) and should NOT pass.
+        model_match = (not model_tokens) or model_tokens.issubset(title_words)
         brand_match = _brand_match(brand_tokens, title_words, seller)
         results.append(
             {
@@ -259,14 +304,22 @@ def search_shopping(query: str, limit: int = 20) -> list[dict]:
     # 20-result search down to a handful (e.g. one seller's listings surviving
     # every filter while everyone else's get trimmed a little at each stage).
     # If that's happened, top back up from the full candidate pool -- by
-    # relevance, ignoring the stricter stages -- so the page always shows a
-    # reasonable spread rather than a tiny, accidentally one-sided list.
+    # relevance -- so the page always shows a reasonable spread rather than
+    # a tiny, accidentally one-sided list.
+    #
+    # IMPORTANT: this must still respect the brand/model lock. Those aren't
+    # an accidental side-effect of stacking filters -- they're a deliberate
+    # "this is a different product" decision (e.g. excluding a Titan Neo
+    # watch from a "raga by titan" search). Backfilling past that would
+    # silently undo the fix and let the wrong product back in.
     if len(pool) < _MIN_RESULTS:
         have = {r["product_id"] for r in pool}
-        backfill = sorted(
-            (r for r in results if r["product_id"] not in have),
-            key=lambda r: -r["relevance"],
-        )
+        candidates = (r for r in results if r["product_id"] not in have)
+        if model_tokens:
+            candidates = (r for r in candidates if r["model_match"])
+        if brand_tokens:
+            candidates = (r for r in candidates if r["brand_match"])
+        backfill = sorted(candidates, key=lambda r: -r["relevance"])
         pool = pool + backfill[: _MIN_RESULTS - len(pool)]
 
     return sorted(pool, key=lambda r: r["price"])[:limit]
