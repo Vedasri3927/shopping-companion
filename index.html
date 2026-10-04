@@ -134,17 +134,30 @@
   .chart-stats b { color: var(--ink); font-size: 0.92rem; }
   .chart-stats .lo { color: #1f6f4a; }
   .chart-stats .hi { color: #b3261e; }
+  .hero .sub { margin-bottom: 12px; }
+  .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 6px; font-size: 0.85rem; color: var(--muted); }
+  button.chip { padding: 5px 12px; border-radius: 20px; background: white; color: var(--ink); border: 1px solid var(--line); font-size: 0.85rem; font-weight: 500; }
+  button.chip:hover { border-color: var(--accent); color: var(--accent); }
+  .trusted { display: inline-block; margin-left: 6px; font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 1px 6px; border-radius: 20px; white-space: nowrap; }
+  #results, #wishlist { overflow-x: auto; }
+  .chart-svg-wrap svg { max-width: 100%; height: auto; }
+  @media (max-width: 640px) {
+    .wrap { padding: 24px 12px 60px; }
+    table { font-size: 0.85rem; }
+    td, th { padding: 10px 6px; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Shopping Companion</h1>
-  <p class="sub">Search a product and compare live prices across sellers.</p>
+  <p class="sub">Is that discount real? Shopping Companion checks every listing against real price history and gives it a Buy Score, so you can tell a genuine deal from an inflated one.</p>
 
   <form id="search-form">
     <input type="text" id="query" placeholder="e.g. boat airdopes 141" autocomplete="off" required />
     <button type="submit" id="search-btn">Search</button>
   </form>
+  <div class="chips" id="chips"><span>Try:</span></div>
 
   <div class="row">
     <span class="count" id="count"></span>
@@ -178,9 +191,22 @@
   const wishEl = document.getElementById("wishlist");
   const checkBtn = document.getElementById("check-drops");
 
+  // Example searches shown under the search box. Edit this list to queries you have tested.
+  const chipsEl = document.getElementById("chips");
+  const EXAMPLES = ["boat airdopes 141", "hp victus", "raga by titan"];
+  EXAMPLES.forEach(q => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.textContent = q;
+    b.addEventListener("click", () => { queryInput.value = q; runSearch(q); });
+    chipsEl.appendChild(b);
+  });
+
   let currentResults = [];
   let wishlist = [];
   let sortChain = []; // e.g. [{key:"price", asc:true}, {key:"buy_score", asc:false}]; empty = price low to high
+  const SORT_PRIORITY = ["buy_score", "rating", "price", "seller", "title"]; // first = strongest
   const DESC_FIRST = new Set(["buy_score", "rating"]); // higher is better, so first click sorts high to low
 
   async function api(path, opts) {
@@ -244,6 +270,7 @@
     if (i === -1) sortChain.push({ key, asc: !DESC_FIRST.has(key) });
     else if (sortChain[i].asc === !DESC_FIRST.has(key)) sortChain[i].asc = !sortChain[i].asc;
     else sortChain.splice(i, 1);
+    sortChain.sort((a, b) => SORT_PRIORITY.indexOf(a.key) - SORT_PRIORITY.indexOf(b.key));
     render();
   }
 
@@ -302,7 +329,7 @@
               </div>
             </div>
           </td>
-          <td>${escapeHtml(r.seller || "—")}</td>
+          <td>${escapeHtml(r.seller || "—")}${r.score_breakdown && r.score_breakdown.seller === 100 ? '<span class="trusted" title="Recognised retailer or official brand store">✓ Known seller</span>' : ""}</td>
           <td class="price">₹${formatPrice(r.price)}${oldPrice}${isBest ? '<span class="badge">Lowest</span>' : ""}${r.unit_price_label ? `<div class="reason">${escapeHtml(r.unit_price_label)}</div>` : ""}${chartBtn}</td>
           <td class="rating">${rating}</td>
           <td>${scoreCell}</td>
@@ -316,7 +343,7 @@
         <thead><tr>${headHtml}</tr></thead>
         <tbody>${rowsHtml}</tbody>
       </table>
-      <p class="note">Buy Score combines price history, price vs other sellers, star rating, number of reviews, warranty (only if the listing mentions it) and seller trust. Missing data is left out, not guessed. "Typical price" is a median of similar listings and may include related models. Hover a score for its breakdown. Sorting: click column headers in order to sort by several columns (1 = main sort, 2 = tiebreaker). Click a header again to flip it, a third time to remove it.</p>`;
+      <p class="note">Buy Score combines price history, price vs other sellers, star rating, number of reviews, warranty (only if the listing mentions it) and seller trust. Missing data is left out, not guessed. "Typical price" is a median of similar listings and may include related models. Click a score to see why, or History for the price chart. Sorting: click several column headers to combine them. Priority is fixed: Buy Score, then Rating, then Price, then Seller (the numbers show it). Click a header again to flip it, a third time to remove it.</p>`;
 
     resultsEl.querySelectorAll("th[data-key]").forEach(th => {
       th.addEventListener("click", () => cycleSort(th.dataset.key));
