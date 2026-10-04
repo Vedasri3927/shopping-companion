@@ -79,11 +79,27 @@
   .rating { white-space: nowrap; color: var(--muted); }
   .score {
     display: inline-block; min-width: 38px; text-align: center;
-    font-weight: 700; padding: 4px 8px; border-radius: 8px; cursor: help;
+    font-weight: 700; padding: 4px 8px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent; font-family: inherit; font-size: inherit;
   }
   .score.hi { background: #e8f3ee; color: #1f6f4a; }
   .score.mid { background: #fdf3dc; color: #8a5a00; }
   .score.lo { background: #fbe9e7; color: #b3261e; }
+  .score.active-breakdown { border-color: currentColor; }
+
+  .breakdown-bars { display: flex; flex-direction: column; gap: 7px; min-width: 240px; }
+  .breakdown-bar-row { display: grid; grid-template-columns: 90px 1fr 34px; align-items: center; gap: 8px; font-size: 0.78rem; }
+  .breakdown-bar-row .label { color: var(--muted); }
+  .breakdown-bar-track { background: #eceef0; border-radius: 20px; height: 8px; overflow: hidden; }
+  .breakdown-bar-fill { height: 100%; border-radius: 20px; }
+  .breakdown-bar-fill.hi { background: #1f6f4a; }
+  .breakdown-bar-fill.mid { background: #c98a00; }
+  .breakdown-bar-fill.lo { background: #b3261e; }
+  .breakdown-bar-row .val { text-align: right; font-weight: 600; color: var(--ink); }
+  .breakdown-bar-row .val.na { color: var(--muted); font-weight: 400; font-style: italic; }
+  .chart-panel-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .chart-panel-section:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  .chart-panel h4 { margin: 0 0 10px; font-size: 0.82rem; font-weight: 650; color: var(--ink); }
   .verdict { font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
   .v-genuine-deal, .v-below-typical-price { background: #e8f3ee; color: #1f6f4a; }
   .v-fair-price { background: #eef0f2; color: #4b5563; }
@@ -101,6 +117,23 @@
   .target { width: 110px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 0.88rem; }
   .hit { background: #e8f3ee; color: #1f6f4a; }
   .drop { color: #1f6f4a; font-size: 0.82rem; font-weight: 600; }
+
+  .chart-btn {
+    background: var(--accent); border: 1px solid var(--accent); color: white;
+    height: 24px; border-radius: 6px; cursor: pointer;
+    margin-left: 6px; vertical-align: middle; padding: 0 8px;
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.72rem; font-weight: 600; white-space: nowrap;
+  }
+  .chart-btn:hover, .chart-btn.open { background: #164f36; border-color: #164f36; }
+  .chart-row td { padding: 0; border-bottom: 1px solid var(--line); }
+  .chart-panel { padding: 16px 18px; background: #fbfbfa; }
+  .chart-panel .loading, .chart-panel .empty { padding: 10px 0; font-size: 0.85rem; color: var(--muted); }
+  .chart-svg-wrap { display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
+  .chart-stats { font-size: 0.8rem; color: var(--muted); line-height: 1.6; min-width: 140px; }
+  .chart-stats b { color: var(--ink); font-size: 0.92rem; }
+  .chart-stats .lo { color: #1f6f4a; }
+  .chart-stats .hi { color: #b3261e; }
 </style>
 </head>
 <body>
@@ -249,13 +282,15 @@
         : `<div style="width:40px;height:40px;border-radius:6px;border:1px solid var(--line);flex-shrink:0"></div>`;
       const link = r.link || "#";
       const on = saved.has(r.product_id);
-      const star = `<button type="button" class="star ${on ? "on" : ""}" data-pid="${escapeAttr(r.product_id)}" title="${on ? "Remove from wishlist" : "Add to wishlist"}">${on ? "★" : "☆"}</button>`;
+      const pid = escapeAttr(r.product_id);
+      const star = `<button type="button" class="star ${on ? "on" : ""}" data-pid="${pid}" title="${on ? "Remove from wishlist" : "Add to wishlist"}">${on ? "★" : "☆"}</button>`;
       const scoreCell = r.buy_score == null
         ? '<span class="rating">—</span>'
-        : `<span class="score ${scoreClass(r.buy_score)}" title="${escapeAttr(breakdownText(r))}">${r.buy_score}</span>`;
+        : `<button type="button" class="score ${scoreClass(r.buy_score)}" data-pid="${pid}" title="Click to see why">${r.buy_score}</button>`;
       const verdictCell = r.deal_verdict
         ? `<span class="verdict v-${slug(r.deal_verdict)}">${escapeHtml(r.deal_verdict)}</span><div class="reason">${escapeHtml(r.deal_reason || "")}</div>${r.warranty ? `<div class="reason">🛡 ${escapeHtml(r.warranty)}</div>` : ""}`
         : "—";
+      const chartBtn = `<button type="button" class="chart-btn" data-pid="${pid}" title="View price history"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"></polyline><polyline points="15 6 21 6 21 12"></polyline></svg>History</button>`;
       return `
         <tr class="${isBest ? "best" : ""}">
           <td>
@@ -268,11 +303,12 @@
             </div>
           </td>
           <td>${escapeHtml(r.seller || "—")}</td>
-          <td class="price">₹${formatPrice(r.price)}${oldPrice}${isBest ? '<span class="badge">Lowest</span>' : ""}${r.unit_price_label ? `<div class="reason">${escapeHtml(r.unit_price_label)}</div>` : ""}</td>
+          <td class="price">₹${formatPrice(r.price)}${oldPrice}${isBest ? '<span class="badge">Lowest</span>' : ""}${r.unit_price_label ? `<div class="reason">${escapeHtml(r.unit_price_label)}</div>` : ""}${chartBtn}</td>
           <td class="rating">${rating}</td>
           <td>${scoreCell}</td>
           <td>${verdictCell}</td>
-        </tr>`;
+        </tr>
+        <tr class="chart-row" data-chart-for="${pid}" hidden><td colspan="6"></td></tr>`;
     }).join("");
 
     resultsEl.innerHTML = `
@@ -332,8 +368,12 @@
   }
 
   resultsEl.addEventListener("click", (e) => {
-    const b = e.target.closest(".star");
-    if (b) toggleStar(b.dataset.pid);
+    const star = e.target.closest(".star");
+    if (star) { toggleStar(star.dataset.pid); return; }
+    const chartBtn = e.target.closest(".chart-btn");
+    if (chartBtn) { toggleChart(chartBtn.dataset.pid); return; }
+    const scoreBtn = e.target.closest(".score");
+    if (scoreBtn) { toggleChart(scoreBtn.dataset.pid); return; }
   });
   wishEl.addEventListener("click", (e) => {
     const b = e.target.closest(".remove");
@@ -363,6 +403,144 @@
     checkBtn.disabled = false;
     checkBtn.textContent = "Check for price drops";
   });
+
+  // ---------------------------------------------------------- price history
+  const historyCache = new Map(); // product_id -> snapshots array (or "empty")
+
+  async function toggleChart(pid) {
+    const row = resultsEl.querySelector(`tr.chart-row[data-chart-for="${cssEscape(pid)}"]`);
+    if (!row) return;
+    // Both the score badge and the History button for this product open the
+    // same panel -- keep their pressed/open visual state in sync.
+    const triggers = resultsEl.querySelectorAll(
+      `.chart-btn[data-pid="${cssEscape(pid)}"], .score[data-pid="${cssEscape(pid)}"]`
+    );
+    if (!row.hidden) {
+      row.hidden = true;
+      triggers.forEach(t => t.classList.remove("open", "active-breakdown"));
+      return;
+    }
+    row.hidden = false;
+    triggers.forEach(t => t.classList.add("open", "active-breakdown"));
+    const cell = row.querySelector("td");
+
+    // "Why this score" renders instantly -- score_breakdown is already in
+    // currentResults, no network call needed for this part. Skipped when
+    // there's no score at all (e.g. opened via the History button on a
+    // listing with too little data to be scored).
+    const item = currentResults.find(r => r.product_id === pid);
+    const breakdownHtml = (item && item.buy_score != null) ? renderBreakdownSection(item) : "";
+
+    const historyHtml = historyCache.has(pid)
+      ? renderHistorySection(historyCache.get(pid))
+      : '<div class="loading">Loading price history…</div>';
+    cell.innerHTML = `<div class="chart-panel">${breakdownHtml}${historyHtml}</div>`;
+
+    if (historyCache.has(pid)) return;
+    try {
+      const data = await api(`/history/${encodeURIComponent(pid)}`);
+      const snaps = data.snapshots || [];
+      historyCache.set(pid, snaps);
+    } catch (err) {
+      historyCache.set(pid, "empty"); // a 404 just means no history yet, not an error
+    }
+    // Re-check the row is still open before touching the DOM -- the user
+    // may have collapsed it while the fetch was in flight. The history
+    // section is always the last of the (at most two) panel sections.
+    if (!row.hidden) {
+      const sections = cell.querySelectorAll(".chart-panel-section");
+      const histSection = sections[sections.length - 1];
+      if (histSection) histSection.outerHTML = renderHistorySection(historyCache.get(pid));
+    }
+  }
+
+  const FACTOR_NAMES = {
+    history: "Price history", spread: "vs other sellers", rating: "Star rating",
+    reviews: "Review count", warranty: "Warranty", seller: "Seller trust",
+  };
+
+  function renderBreakdownSection(item) {
+    const b = item.score_breakdown || {};
+    const rows = Object.keys(FACTOR_NAMES).map(k => {
+      const v = b[k];
+      if (v == null) {
+        return `<div class="breakdown-bar-row">
+          <span class="label">${FACTOR_NAMES[k]}</span>
+          <div class="breakdown-bar-track"></div>
+          <span class="val na">n/a</span>
+        </div>`;
+      }
+      const cls = v >= 70 ? "hi" : v >= 45 ? "mid" : "lo";
+      return `<div class="breakdown-bar-row">
+        <span class="label">${FACTOR_NAMES[k]}</span>
+        <div class="breakdown-bar-track"><div class="breakdown-bar-fill ${cls}" style="width:${Math.max(0, Math.min(100, v))}%"></div></div>
+        <span class="val">${v}</span>
+      </div>`;
+    }).join("");
+    return `
+      <div class="chart-panel-section">
+        <h4>Why this score: ${item.buy_score}/100</h4>
+        <div class="breakdown-bars">${rows}</div>
+      </div>`;
+  }
+
+  function renderHistorySection(snaps) {
+    let body;
+    if (snaps === "empty" || !snaps.length) {
+      body = '<div class="empty">No price history yet for this product — it builds up as it gets searched again over time.</div>';
+    } else if (snaps.length === 1) {
+      body = `<div class="empty">Only one price point so far (₹${formatPrice(snaps[0].price)}). Check back after this product is searched again.</div>`;
+    } else {
+      const prices = snaps.map(s => s.price);
+      const lo = Math.min(...prices), hi = Math.max(...prices);
+      const latest = prices[prices.length - 1];
+      const loIdx = prices.indexOf(lo), hiIdx = prices.indexOf(hi);
+      body = `
+        <div class="chart-svg-wrap">
+          ${buildSparkline(snaps)}
+          <div class="chart-stats">
+            <div>Latest: <b>₹${formatPrice(latest)}</b></div>
+            <div>Lowest seen: <b class="lo">₹${formatPrice(lo)}</b> (${formatDate(snaps[loIdx].captured_at)})</div>
+            <div>Highest seen: <b class="hi">₹${formatPrice(hi)}</b> (${formatDate(snaps[hiIdx].captured_at)})</div>
+            <div>${snaps.length} price points recorded</div>
+          </div>
+        </div>`;
+    }
+    return `<div class="chart-panel-section"><h4>Price history</h4>${body}</div>`;
+  }
+
+  function buildSparkline(snaps) {
+    const W = 420, H = 110, PAD = 28;
+    const prices = snaps.map(s => s.price);
+    let lo = Math.min(...prices), hi = Math.max(...prices);
+    if (lo === hi) { lo -= 1; hi += 1; } // avoid a flat divide-by-zero line
+    const n = snaps.length;
+    const x = i => PAD + (i / (n - 1)) * (W - 2 * PAD);
+    const y = p => H - PAD - ((p - lo) / (hi - lo)) * (H - 2 * PAD);
+    const points = snaps.map((s, i) => `${x(i).toFixed(1)},${y(s.price).toFixed(1)}`).join(" ");
+    const dots = snaps.map((s, i) =>
+      `<circle cx="${x(i).toFixed(1)}" cy="${y(s.price).toFixed(1)}" r="3" fill="#1f6f4a">
+         <title>₹${formatPrice(s.price)} · ${escapeAttr(s.seller || "")} · ${formatDate(s.captured_at)}</title>
+       </circle>`
+    ).join("");
+    return `
+      <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Price history chart">
+        <line x1="${PAD}" y1="${H - PAD}" x2="${W - PAD}" y2="${H - PAD}" stroke="#e5e7eb" stroke-width="1" />
+        <polyline points="${points}" fill="none" stroke="#1f6f4a" stroke-width="2" />
+        ${dots}
+      </svg>`;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "";
+    const d = new Date(iso.replace(" ", "T") + "Z");
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  }
+
+  function cssEscape(s) {
+    return window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+  }
 
   // ---------------------------------------------------------------- helpers
   function scoreClass(n) { return n >= 70 ? "hi" : n >= 45 ? "mid" : "lo"; }
