@@ -96,6 +96,7 @@ _ACCESSORY_ONLY_SELLERS = {
 
 
 _STRONG_ACCESSORY_RAW = {
+    "skal", "hoesje", "hulle", "kryt", "carcasa", "pokrowiec",
     "etui", "funda", "coque", "custodia", "capa", "estuche",
     "case", "cover", "skin", "sticker", "protector", "pouch", "strap",
     "charger", "cable", "adapter", "tempered", "screenguard", "decal",
