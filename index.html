@@ -21,7 +21,7 @@
     background: var(--paper);
     color: var(--ink);
   }
-  .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 80px; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px 20px 80px; }
   h1 { font-size: 1.5rem; font-weight: 650; margin: 0 0 4px; letter-spacing: -0.01em; }
   .sub { color: var(--muted); font-size: 0.92rem; margin: 0 0 28px; }
   form { display: flex; gap: 8px; margin-bottom: 8px; }
@@ -146,6 +146,57 @@
     table { font-size: 0.85rem; }
     td, th { padding: 10px 6px; }
   }
+  .seller-hist { margin-top: 16px; }
+  .seller-hist h4 { margin: 0 0 6px; font-size: 0.78rem; font-weight: 650; color: var(--muted); }
+  .seller-hist table { width: auto; min-width: 360px; font-size: 0.8rem; }
+  .seller-hist th { cursor: default; padding: 4px 14px 4px 0; font-size: 0.75rem; }
+  .seller-hist td { padding: 4px 14px 4px 0; border-bottom: 1px solid var(--line); }
+  .seller-hist tr:hover td { background: none; }
+  .seller-hist .lo { color: #1f6f4a; font-weight: 600; }
+  .seller-hist .hi { color: #b3261e; font-weight: 600; }
+  .seller-hist .cap { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+
+  .insights { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 18px; }
+  .stat { background: white; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; min-width: 130px; }
+  .stat .k { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat .v { font-size: 1.08rem; font-weight: 650; margin-top: 2px; }
+  .stat .v.good { color: var(--accent); }
+  .stat .v.bad { color: var(--danger); }
+  .pick { flex-basis: 100%; display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+    background: linear-gradient(135deg, #e8f3ee, #f5faf7); border: 1px solid #b9ddc9; border-radius: 12px; padding: 14px 16px; }
+  .pick img { width: 56px; height: 56px; object-fit: contain; background: white; border: 1px solid var(--line); border-radius: 8px; }
+  .pick-main { flex: 1; min-width: 220px; }
+  .pick .tag { font-size: 0.68rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.07em; }
+  .pick .t { font-weight: 650; margin: 2px 0 4px; }
+  .pick .why { font-size: 0.82rem; color: #4b5563; line-height: 1.4; max-width: 680px; }
+  .pick-right { text-align: right; font-size: 0.82rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+  .pick-right .p { font-size: 1.25rem; font-weight: 700; color: var(--ink); }
+  button.link { background: none; color: var(--accent); padding: 0; font-size: 0.82rem; font-weight: 600; text-decoration: underline; }
+  .pickb { display: inline-block; font-size: 0.66rem; font-weight: 700; background: #16181c; color: white; padding: 1px 7px; border-radius: 20px; margin-right: 6px; letter-spacing: 0.03em; }
+  .prod-main { min-width: 0; }
+  .cmp-label { display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--muted); margin-top: 4px; cursor: pointer; user-select: none; }
+  .cmp-label input { margin: 0; }
+  #compare-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: 18px; z-index: 30;
+    background: #16181c; color: white; padding: 10px 14px; border-radius: 12px; display: flex; gap: 12px; align-items: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25); font-size: 0.88rem; }
+  #compare-bar[hidden] { display: none; }
+  .cmp-hint { color: #f0c36b; font-size: 0.8rem; }
+  #compare-bar button.alt { background: transparent; border: 1px solid #4b5563; color: #d1d5db; }
+  .modal-back { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: flex-start;
+    justify-content: center; padding: 40px 16px; overflow: auto; z-index: 40; }
+  .modal-back[hidden] { display: none; }
+  .modal { background: white; border-radius: 14px; max-width: 1000px; width: 100%; padding: 20px 22px; }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .modal-head h3 { margin: 0; font-size: 1.05rem; }
+  .cmp-table { table-layout: fixed; }
+  .cmp-table th, .cmp-table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; cursor: default; white-space: normal; }
+  .cmp-table th.rowh { color: var(--muted); font-weight: 550; width: 120px; }
+  .cmp-table th.colh img { width: 48px; height: 48px; object-fit: contain; display: block; margin-bottom: 6px; background: white; border: 1px solid var(--line); border-radius: 6px; }
+  .cmp-table th.colh a { color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.86rem; }
+  .cmp-table td.win { background: var(--accent-soft); font-weight: 650; }
+  .cmp-table .na { color: var(--muted); font-style: italic; font-weight: 400; }
+  button.plain { background: none; color: var(--ink); padding: 0; font-size: 1rem; font-weight: 650; }
+  #wish-count { font-weight: 400; color: var(--muted); font-size: 0.85rem; }
 </style>
 </head>
 <body>
@@ -166,15 +217,30 @@
     </label>
   </div>
 
+  <div id="insights"></div>
+
   <section id="wishlist-section" hidden>
     <div class="row">
-      <h2>★ Wishlist</h2>
+      <h2><button type="button" class="plain" id="wish-toggle">★ Wishlist <span id="wish-count"></span> <span id="wish-chev">▸</span></button></h2>
       <button class="small" id="check-drops" type="button">Check for price drops</button>
     </div>
-    <div id="wishlist"></div>
+    <div id="wishlist" hidden></div>
   </section>
 
   <div id="results"></div>
+
+  <div id="compare-bar" hidden>
+    <span id="compare-count">0 selected</span>
+    <span id="compare-hint" class="cmp-hint"></span>
+    <button type="button" class="small" id="compare-go" disabled>Compare</button>
+    <button type="button" class="small alt" id="compare-clear">Clear</button>
+  </div>
+  <div id="compare-modal" class="modal-back" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Compare products">
+      <div class="modal-head"><h3>Compare products</h3><button type="button" class="small ghost" data-close>Close</button></div>
+      <div id="compare-body"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -193,7 +259,7 @@
 
   // Example searches shown under the search box. Edit this list to queries you have tested.
   const chipsEl = document.getElementById("chips");
-  const EXAMPLES = ["boat airdopes 141", "hp victus", "raga by titan"];
+   const EXAMPLES = ["hp victus", "raga by titan", "cmf nothing buds pro 2"];
   EXAMPLES.forEach(q => {
     const b = document.createElement("button");
     b.type = "button";
@@ -236,6 +302,7 @@
       const data = await api(`/search?q=${encodeURIComponent(q)}&refresh=${refreshInput.checked}`);
       currentResults = data.results || [];
       sortChain = [];
+      compareSet.clear(); updateCompareBar();
       countEl.textContent = currentResults.length
         ? `${currentResults.length} results · ${data.source === "cache" ? "cached" : "live"}`
         : "";
@@ -275,12 +342,16 @@
   }
 
   function render() {
+    renderInsights();
     if (!currentResults.length) {
-      resultsEl.innerHTML = '<div class="empty">No results yet. Try a search above.</div>';
+      resultsEl.innerHTML = '<div class="empty">No listings matched that search. Try fewer words, or just the brand and model (for example "hp victus").</div>';
       return;
     }
     const sorted = sortResults();
-    const lowestPrice = Math.min(...currentResults.map(r => r.price));
+    const pick = pickBest(currentResults);
+    // "Lowest" should never crown a listing we flagged as suspicious or inflated.
+    const lowestPool = currentResults.filter(r => !FLAGGED_VERDICTS.has(r.deal_verdict) && r.deal_verdict !== "Refurbished / used");
+    const lowestPrice = Math.min(...(lowestPool.length ? lowestPool : currentResults).map(r => r.price));
     const saved = new Set(wishlist.map(w => w.product_id));
 
     const headers = [
@@ -301,7 +372,8 @@
     }).join("");
 
     const rowsHtml = sorted.map(r => {
-      const isBest = r.price === lowestPrice;
+      const isBest = r.price === lowestPrice && !FLAGGED_VERDICTS.has(r.deal_verdict);
+      const isPick = !!pick && pick.product_id === r.product_id;
       const oldPrice = (r.old_price && r.old_price > r.price) ? `<span class="old-price">₹${formatPrice(r.old_price)}</span>` : "";
       const rating = r.rating ? `${r.rating}★${r.reviews ? ` (${r.reviews})` : ""}` : "—";
       const thumb = r.thumbnail
@@ -324,8 +396,11 @@
             <div class="prod">
               ${star}
               ${thumb}
-              <div class="prod-title">
-                <a href="${escapeAttr(link)}" target="_blank" rel="noopener">${escapeHtml(r.title)}</a>
+              <div class="prod-main">
+                <div class="prod-title">
+                  ${isPick ? '<span class="pickb">Our pick</span>' : ""}<a href="${escapeAttr(link)}" target="_blank" rel="noopener">${escapeHtml(r.title)}</a>
+                </div>
+                <label class="cmp-label"><input type="checkbox" class="cmp" data-pid="${pid}" ${compareSet.has(r.product_id) ? "checked" : ""}> Compare</label>
               </div>
             </div>
           </td>
@@ -350,6 +425,186 @@
     });
   }
 
+  // ------------------------------------------------- insights, pick, compare
+  const insightsEl = document.getElementById("insights");
+  const compareBarEl = document.getElementById("compare-bar");
+  const compareCountEl = document.getElementById("compare-count");
+  const compareGoBtn = document.getElementById("compare-go");
+  const compareClearBtn = document.getElementById("compare-clear");
+  const compareHintEl = document.getElementById("compare-hint");
+  const compareModalEl = document.getElementById("compare-modal");
+  const compareBodyEl = document.getElementById("compare-body");
+  const wishToggleBtn = document.getElementById("wish-toggle");
+  const wishCountEl = document.getElementById("wish-count");
+  const wishChevEl = document.getElementById("wish-chev");
+
+  const FLAGGED_VERDICTS = new Set(["Inflated discount", "Suspiciously low"]);
+  // Verdicts that mean "don't recommend this one", even if its score looks fine.
+  const NOT_PICKABLE = new Set(["Inflated discount", "Suspiciously low", "Refurbished / used", "Pack size unclear", "Not comparable", "Not enough data"]);
+  const MAX_COMPARE = 3;
+  const compareSet = new Set();
+  let wishCollapsed = true;
+
+  function median(nums) {
+    const a = nums.filter(n => Number.isFinite(n)).sort((x, y) => x - y);
+    if (!a.length) return null;
+    const m = Math.floor(a.length / 2);
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
+
+  // The single listing we'd recommend: best Buy Score among listings that are
+  // actually comparable and not flagged. Needs at least two such listings,
+  // otherwise "best" means nothing.
+  function pickBest(results) {
+    const cands = results.filter(r => r.buy_score != null && !NOT_PICKABLE.has(r.deal_verdict));
+    if (cands.length < 2) return null;
+    cands.sort((a, b) => (b.buy_score - a.buy_score) || (a.price - b.price));
+    return cands[0];
+  }
+
+  function renderInsights() {
+    if (!currentResults.length) { insightsEl.innerHTML = ""; return; }
+    const prices = currentResults.map(r => r.price);
+    const med = median(prices);
+    const notComparable = currentResults.filter(r => r.deal_verdict === "Not comparable").length;
+    const tooVaried = notComparable >= currentResults.length / 2;
+    const genuine = currentResults.filter(r => r.deal_verdict === "Genuine deal").length;
+    const good = genuine + currentResults.filter(r => r.deal_verdict === "Below typical price").length;
+    const flagged = currentResults.filter(r => FLAGGED_VERDICTS.has(r.deal_verdict)).length;
+    const stat = (k, v, cls, title) =>
+      `<div class="stat"${title ? ` title="${escapeAttr(title)}"` : ""}><div class="k">${k}</div><div class="v ${cls || ""}">${v}</div></div>`;
+    const stats = [
+      stat("Listings", currentResults.length),
+      tooVaried
+        ? stat("Typical price", "Too varied", "", "These listings differ too much in size or type for a fair typical price. Try a more specific search.")
+        : stat("Typical price", "₹" + formatPrice(med), "", "Median price across the listings shown"),
+      stat("Price range", `₹${formatPrice(Math.min(...prices))} – ₹${formatPrice(Math.max(...prices))}`),
+      stat("Good deals", good, good ? "good" : "", `${genuine} genuine deal(s) with a real markdown, ${good - genuine} below the typical price`),
+      stat("Red flags", flagged, flagged ? "bad" : "", "Listings with an inflated discount or a suspiciously low price"),
+    ].join("");
+
+    const pick = pickBest(currentResults);
+    let pickHtml = "";
+    if (pick) {
+      const strong = pick.buy_score >= 65;
+      const rated = (pick.rating && (pick.reviews || 0) >= 5) ? ` Rated ${pick.rating}★ by ${pick.reviews} buyers.` : "";
+      const caveat = strong ? "" : " No listing here scored strongly, so treat this as the best of a weak set, not a clear win.";
+      pickHtml = `<div class="pick">
+        ${pick.thumbnail ? `<img src="${escapeAttr(pick.thumbnail)}" alt="" />` : ""}
+        <div class="pick-main">
+          <div class="tag">${strong ? "Our pick" : "Best available"}</div>
+          <div class="t">${escapeHtml(pick.title)}</div>
+          <div class="why"><b>${escapeHtml(pick.deal_verdict || "")}.</b> ${escapeHtml(pick.deal_reason || "")}${rated}${caveat}</div>
+        </div>
+        <div class="pick-right">
+          <div class="p">₹${formatPrice(pick.price)}</div>
+          <div>${escapeHtml(pick.seller || "")}</div>
+          <div><span class="score ${scoreClass(pick.buy_score)}" style="cursor:default">${pick.buy_score}</span>
+            <button type="button" class="link" data-pick="${escapeAttr(pick.product_id)}">See why</button></div>
+        </div>
+      </div>`;
+    }
+    insightsEl.innerHTML = `<div class="insights">${stats}${pickHtml}</div>`;
+  }
+
+  insightsEl.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-pick]");
+    if (b) openDetails(b.dataset.pick);
+  });
+
+  // Open (never close) the details panel for a product and bring it into view.
+  function openDetails(pid) {
+    const row = resultsEl.querySelector(`tr.chart-row[data-chart-for="${cssEscape(pid)}"]`);
+    if (!row) return;
+    if (row.hidden) toggleChart(pid);
+    const anchor = row.previousElementSibling || row;
+    anchor.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  // ---- compare
+  function updateCompareBar() {
+    const n = compareSet.size;
+    compareBarEl.hidden = n === 0;
+    compareCountEl.textContent = `${n} selected`;
+    compareGoBtn.disabled = n < 2;
+    compareHintEl.textContent = n === 1 ? "Pick one more to compare" : "";
+  }
+  let hintTimer = null;
+  function flashHint(msg) {
+    compareHintEl.textContent = msg;
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(updateCompareBar, 2500);
+  }
+
+  resultsEl.addEventListener("change", (e) => {
+    const cb = e.target.closest(".cmp");
+    if (!cb) return;
+    const pid = cb.dataset.pid;
+    if (cb.checked) {
+      if (compareSet.size >= MAX_COMPARE) {
+        cb.checked = false;
+        flashHint(`You can compare up to ${MAX_COMPARE} products`);
+        return;
+      }
+      compareSet.add(pid);
+    } else {
+      compareSet.delete(pid);
+    }
+    updateCompareBar();
+  });
+
+  // Indexes of the best value in a row (only when 2+ values exist and they differ).
+  function bestIdx(values, higherBetter) {
+    const nums = values.map(v => (typeof v === "number" && Number.isFinite(v)) ? v : null);
+    const present = nums.filter(v => v !== null);
+    if (present.length < 2) return new Set();
+    const target = higherBetter ? Math.max(...present) : Math.min(...present);
+    if (present.every(v => v === target)) return new Set();
+    return new Set(nums.map((v, i) => (v === target ? i : -1)).filter(i => i >= 0));
+  }
+
+  function openCompare() {
+    const items = [...compareSet].map(id => currentResults.find(r => r.product_id === id)).filter(Boolean);
+    if (items.length < 2) return;
+    const row = (label, cells, win) =>
+      `<tr><th class="rowh">${label}</th>${cells.map((c, i) => `<td class="${win && win.has(i) ? "win" : ""}">${c}</td>`).join("")}</tr>`;
+    const head = `<tr><th class="rowh"></th>${items.map(r =>
+      `<th class="colh">${r.thumbnail ? `<img src="${escapeAttr(r.thumbnail)}" alt="" />` : ""}<a href="${escapeAttr(r.link || "#")}" target="_blank" rel="noopener">${escapeHtml(r.title)}</a></th>`
+    ).join("")}</tr>`;
+    const factorRows = Object.keys(FACTOR_NAMES).map(k => {
+      const vals = items.map(r => (r.score_breakdown || {})[k]);
+      return row(FACTOR_NAMES[k], vals.map(v => (v == null ? '<span class="na">n/a</span>' : String(v))), bestIdx(vals, true));
+    });
+    const rows = [
+      row("Seller", items.map(r => escapeHtml(r.seller || "—"))),
+      row("Price", items.map(r => `₹${formatPrice(r.price)}${(r.old_price && r.old_price > r.price) ? ` <span class="old-price">₹${formatPrice(r.old_price)}</span>` : ""}`), bestIdx(items.map(r => r.price), false)),
+      row("Rating", items.map(r => (r.rating ? `${r.rating}★${r.reviews ? ` (${r.reviews})` : ""}` : "—")), bestIdx(items.map(r => ((r.reviews || 0) >= 5 ? r.rating : null)), true)),
+      row("Buy Score", items.map(r => (r.buy_score == null ? "—" : `<span class="score ${scoreClass(r.buy_score)}" style="cursor:default">${r.buy_score}</span>`)), bestIdx(items.map(r => r.buy_score), true)),
+      row("Verdict", items.map(r => (r.deal_verdict ? `<span class="verdict v-${slug(r.deal_verdict)}">${escapeHtml(r.deal_verdict)}</span>` : "—"))),
+      row("Why", items.map(r => `<span class="reason" style="max-width:none">${escapeHtml(r.deal_reason || "")}</span>`)),
+      ...factorRows,
+      row("Warranty", items.map(r => escapeHtml(r.warranty || "—"))),
+    ].join("");
+    compareBodyEl.innerHTML = `<table class="cmp-table"><thead>${head}</thead><tbody>${rows}</tbody></table>
+      <p class="note">Highlighted cells show the best value in each row. A factor marked n/a had no data, so it was left out of that product's score rather than counted as zero.</p>`;
+    compareModalEl.hidden = false;
+  }
+  function closeCompare() { compareModalEl.hidden = true; }
+
+  compareGoBtn.addEventListener("click", openCompare);
+  compareClearBtn.addEventListener("click", () => { compareSet.clear(); updateCompareBar(); render(); });
+  compareModalEl.addEventListener("click", (e) => {
+    if (e.target === compareModalEl || e.target.closest("[data-close]")) closeCompare();
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeCompare(); });
+
+  // ---- collapsible wishlist
+  wishToggleBtn.addEventListener("click", () => {
+    wishCollapsed = !wishCollapsed;
+    wishEl.hidden = wishCollapsed;
+    wishChevEl.textContent = wishCollapsed ? "▸" : "▾";
+  });
+
   // ---------------------------------------------------------------- wishlist
   async function loadWishlist() {
     try { wishlist = (await api("/wishlist")).items; } catch (e) { wishlist = []; }
@@ -360,6 +615,9 @@
   function renderWishlist() {
     wishSection.hidden = !wishlist.length;
     if (!wishlist.length) return;
+    const hits = wishlist.filter(w => w.target_hit).length;
+    wishCountEl.textContent = `(${wishlist.length}${hits ? ` · ${hits} target reached` : ""})`;
+    wishEl.hidden = wishCollapsed;
     const rows = wishlist.map(w => {
       const status = w.target_hit
         ? '<span class="verdict hit">Target reached</span>'
@@ -460,7 +718,7 @@
 
     const historyHtml = historyCache.has(pid)
       ? renderHistorySection(historyCache.get(pid))
-      : '<div class="loading">Loading price history…</div>';
+      : '<div class="chart-panel-section hist-section"><h4>Price history</h4><div class="loading">Loading price history…</div></div>';
     cell.innerHTML = `<div class="chart-panel">${breakdownHtml}${historyHtml}</div>`;
 
     if (historyCache.has(pid)) return;
@@ -475,8 +733,7 @@
     // may have collapsed it while the fetch was in flight. The history
     // section is always the last of the (at most two) panel sections.
     if (!row.hidden) {
-      const sections = cell.querySelectorAll(".chart-panel-section");
-      const histSection = sections[sections.length - 1];
+      const histSection = cell.querySelector(".hist-section");
       if (histSection) histSection.outerHTML = renderHistorySection(historyCache.get(pid));
     }
   }
@@ -522,18 +779,52 @@
       const lo = Math.min(...prices), hi = Math.max(...prices);
       const latest = prices[prices.length - 1];
       const loIdx = prices.indexOf(lo), hiIdx = prices.indexOf(hi);
+      // When every recorded price is identical (common right after a product
+      // is first tracked), showing "Lowest" and "Highest" as the same number
+      // in two different colors reads as a glitch rather than useful info.
+      const rangeLines = lo === hi
+        ? `<div>Steady at <b>₹${formatPrice(lo)}</b> across every recorded check</div>`
+        : `<div>Lowest seen: <b class="lo">₹${formatPrice(lo)}</b> (${formatDate(snaps[loIdx].captured_at)})</div>
+           <div>Highest seen: <b class="hi">₹${formatPrice(hi)}</b> (${formatDate(snaps[hiIdx].captured_at)})</div>`;
       body = `
         <div class="chart-svg-wrap">
           ${buildSparkline(snaps)}
           <div class="chart-stats">
             <div>Latest: <b>₹${formatPrice(latest)}</b></div>
-            <div>Lowest seen: <b class="lo">₹${formatPrice(lo)}</b> (${formatDate(snaps[loIdx].captured_at)})</div>
-            <div>Highest seen: <b class="hi">₹${formatPrice(hi)}</b> (${formatDate(snaps[hiIdx].captured_at)})</div>
+            ${rangeLines}
             <div>${snaps.length} price points recorded</div>
           </div>
         </div>`;
     }
-    return `<div class="chart-panel-section"><h4>Price history</h4>${body}</div>`;
+    return `<div class="chart-panel-section hist-section"><h4>Price history</h4>${body}${sellerTable(snaps)}</div>`;
+  }
+
+  function sellerTable(snaps) {
+    if (!Array.isArray(snaps) || snaps.length < 2) return "";
+    const by = new Map();
+    snaps.forEach(sn => {
+      const key = String(sn.seller || "Unknown seller").trim();
+      if (!by.has(key)) by.set(key, []);
+      by.get(key).push(sn.price);
+    });
+    const rows = [...by.entries()]
+      .map(([seller, prices]) => ({
+        seller, n: prices.length,
+        lo: Math.min(...prices), hi: Math.max(...prices), latest: prices[prices.length - 1],
+      }))
+      .sort((a, b) => a.latest - b.latest);
+    const body = rows.map(r => `<tr>
+        <td>${escapeHtml(r.seller)}</td>
+        <td>₹${formatPrice(r.latest)}</td>
+        <td class="lo">₹${formatPrice(r.lo)}</td>
+        <td class="hi">₹${formatPrice(r.hi)}</td>
+      </tr>`).join("");
+    return `<div class="seller-hist"><h4>By seller</h4>
+      <table>
+        <thead><tr><th>Seller</th><th>Latest</th><th>Lowest seen</th><th>Highest seen</th></tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+      <div class="cap">Based only on prices recorded when this product was searched.</div></div>`;
   }
 
   function buildSparkline(snaps) {
