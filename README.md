@@ -54,11 +54,11 @@ Open `.env` and set `SERPAPI_KEY=your_key_here`, then start the server:
 uvicorn main:app --reload
 ```
 
-Open http://127.0.0.1:8000 in your browser and search, for example `raga by titan`, `hp victus` or `cmf nothing buds pro 2`. The API docs are at http://127.0.0.1:8000/docs, where you can try `/search?q=boat airdopes 141`.
+With the server running, open `index.html` in your browser (double-click it, or run `start index.html` on Windows / `open index.html` on macOS) and search, for example `raga by titan`, `hp victus` or `cmf nothing buds pro 2`. The API docs are at http://127.0.0.1:8000/docs, where you can try `/search?q=boat airdopes 141`.
 
 ## Notes
 
-- Repeating a search loads the saved results (shown as "cached"). Tick **Force live refresh** to fetch new ones.
+- Repeating a search within 30 minutes loads the saved results (shown as "cached"). Tick **Force live refresh** to fetch new ones.
 - Every live search uses one SerpApi credit.
 - Price history grows with use: the more often a product is searched, the more reliable its "typical price" becomes. Until then, verdicts say "from similar listings" rather than claiming a history.
 - Prices and verdicts are guidance, not financial advice. Always check the seller and model before buying.
