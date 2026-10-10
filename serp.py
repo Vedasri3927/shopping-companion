@@ -91,8 +91,25 @@ _CATEGORY_WORDS = {_stem(w) for w in _CATEGORY_WORDS_RAW}
 # (e.g. "SolidX", "Mod NX") doesn't contain an obvious word like "case".
 _ACCESSORY_ONLY_SELLERS = {
     "rhinoshield", "rhinoshield.io", "spigen", "otterbox", "caseology",
-    "ringke", "casetify", "case-mate", "casemate", "ubuy",
+    "ringke", "casetify", "case-mate", "casemate",
 }
+
+
+_STRONG_ACCESSORY_RAW = {
+    "case", "cover", "skin", "sticker", "protector", "pouch", "strap",
+    "charger", "cable", "adapter", "tempered", "screenguard", "decal",
+    "bumper", "sleeve", "tips", "eartips", "holder", "mount",
+}
+_STRONG_ACCESSORY_WORDS = {_stem(w) for w in _STRONG_ACCESSORY_RAW}
+
+
+def _is_strong_accessory(query_words: set[str], title: str, seller: str = "") -> bool:
+    """Clearly a case/cover/charger/etc. (not a vague word like 'screen' or 'stand')."""
+    seller_squashed = re.sub(r"[^a-z0-9.]", "", (seller or "").lower())
+    if any(s in seller_squashed for s in _ACCESSORY_ONLY_SELLERS):
+        return True
+    hit = _significant_words(title) & _STRONG_ACCESSORY_WORDS
+    return bool(hit) and not (hit & query_words)
 
 
 def _product_id(item: dict) -> str:
@@ -103,7 +120,7 @@ def _product_id(item: dict) -> str:
 
 
 def _significant_words(text: str) -> set[str]:
-    words = re.findall(r"[a-z0-9]+", text.lower())
+    words = re.findall(r"[a-z0-9]+", re.sub(r"['’`]", "", text.lower()))
     return {_stem(w) for w in words if w not in _STOPWORDS and len(w) > 1}
 
 
@@ -256,6 +273,7 @@ def search_shopping(query: str, limit: int = 20) -> list[dict]:
                 "thumbnail": it.get("thumbnail"),
                 "relevance": round(score, 2),
                 "is_accessory": _is_accessory(query_words, title, seller),
+                "strong_accessory": _is_strong_accessory(query_words, title, seller),
                 "model_match": model_match,
                 "brand_match": brand_match,
             }
@@ -286,7 +304,7 @@ def search_shopping(query: str, limit: int = 20) -> list[dict]:
 
     # 3. Prefer the actual product over its accessories.
     non_accessory = [r for r in pool if not r["is_accessory"]]
-    pool = non_accessory if non_accessory else pool
+    pool = non_accessory if non_accessory else [r for r in pool if not r["strong_accessory"]]
 
     if max_price is not None:
         capped = [r for r in pool if r["price"] <= max_price]

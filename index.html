@@ -197,6 +197,15 @@
   .cmp-table .na { color: var(--muted); font-style: italic; font-weight: 400; }
   button.plain { background: none; color: var(--ink); padding: 0; font-size: 1rem; font-weight: 650; }
   #wish-count { font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+  .legend { margin: 4px 0 14px; font-size: 0.85rem; color: #4b5563; }
+  .legend summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+  .legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 10px; padding: 14px 16px; background: white; border: 1px solid var(--line); border-radius: 10px; line-height: 2; }
+  .legend .score { cursor: default; min-width: 0; padding: 2px 8px; font-size: 0.8rem; }
+  .signal { margin-top: 8px; font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+  .signal.lo { color: #1f6f4a; }
+  .signal.hi { color: #b3261e; }
+  .prod { max-width: 270px; }
+  .reason { max-width: 200px; }
 </style>
 </head>
 <body>
@@ -227,6 +236,21 @@
     <div id="wishlist" hidden></div>
   </section>
 
+  <details class="legend">
+    <summary>How to read the scores and verdicts</summary>
+    <div class="legend-grid">
+      <div><b>Buy Score (0-100)</b> blends price vs history, price vs other sellers, rating, review count, warranty and seller trust. Missing data is left out, not guessed.<br>
+        <span class="score hi">70+</span> strong &nbsp; <span class="score mid">45-69</span> okay &nbsp; <span class="score lo">under 45</span> weak</div>
+      <div><b>Deal check</b><br>
+        <span class="verdict v-genuine-deal">Genuine deal</span> a real discount and a below-typical price<br>
+        <span class="verdict v-below-typical-price">Below typical price</span> cheaper than similar listings or its history<br>
+        <span class="verdict v-fair-price">Fair price</span> in line with the typical price<br>
+        <span class="verdict v-above-typical-price">Above typical price</span> costs more than usual<br>
+        <span class="verdict v-inflated-discount">Inflated discount</span> the crossed-out price is far above what it normally sells for<br>
+        <span class="verdict v-suspiciously-low">Suspiciously low</span> far below typical: check the seller and model<br>
+        <span class="verdict v-not-comparable">Not comparable</span> listings differ too much to judge fairly</div>
+    </div>
+  </details>
   <div id="results"></div>
 
   <div id="compare-bar" hidden>
@@ -344,7 +368,7 @@
   function render() {
     renderInsights();
     if (!currentResults.length) {
-      resultsEl.innerHTML = '<div class="empty">No listings matched that search. Try fewer words, or just the brand and model (for example "hp victus").</div>';
+      resultsEl.innerHTML = '<div class="empty">No real product listings found for that search. Google may have returned only accessories (cases, covers) or unrelated items. Try the brand and model without extra words, or tap one of the examples above.</div>';
       return;
     }
     const sorted = sortResults();
@@ -467,7 +491,8 @@
     const prices = currentResults.map(r => r.price);
     const med = median(prices);
     const notComparable = currentResults.filter(r => r.deal_verdict === "Not comparable").length;
-    const tooVaried = notComparable >= currentResults.length / 2;
+    const fewListings = currentResults.length < 3;
+    const tooVaried = fewListings || notComparable >= currentResults.length / 2;
     const genuine = currentResults.filter(r => r.deal_verdict === "Genuine deal").length;
     const good = genuine + currentResults.filter(r => r.deal_verdict === "Below typical price").length;
     const flagged = currentResults.filter(r => FLAGGED_VERDICTS.has(r.deal_verdict)).length;
@@ -476,7 +501,7 @@
     const stats = [
       stat("Listings", currentResults.length),
       tooVaried
-        ? stat("Typical price", "Too varied", "", "These listings differ too much in size or type for a fair typical price. Try a more specific search.")
+        ? stat("Typical price", fewListings ? "Too few" : "Too varied", "", fewListings ? "Fewer than 3 listings, so a typical price would not be reliable." : "These listings differ too much in size or type for a fair typical price. Try a more specific search.")
         : stat("Typical price", "₹" + formatPrice(med), "", "Median price across the listings shown"),
       stat("Price range", `₹${formatPrice(Math.min(...prices))} – ₹${formatPrice(Math.max(...prices))}`),
       stat("Good deals", good, good ? "good" : "", `${genuine} genuine deal(s) with a real markdown, ${good - genuine} below the typical price`),
@@ -504,7 +529,10 @@
         </div>
       </div>`;
     }
-    insightsEl.innerHTML = `<div class="insights">${stats}${pickHtml}</div>`;
+    const fewNote = fewListings
+      ? `<div class="note" style="flex-basis:100%;margin:0">Only ${currentResults.length} listing${currentResults.length === 1 ? "" : "s"} found, so scores and verdicts rest on very little data. Try a more specific search or one of the examples above.</div>`
+      : "";
+    insightsEl.innerHTML = `<div class="insights">${stats}${pickHtml}${fewNote}</div>`;
   }
 
   insightsEl.addEventListener("click", (e) => {
@@ -793,10 +821,20 @@
             <div>Latest: <b>₹${formatPrice(latest)}</b></div>
             ${rangeLines}
             <div>${snaps.length} price points recorded</div>
+            ${buySignal(latest, lo, hi)}
           </div>
         </div>`;
     }
     return `<div class="chart-panel-section hist-section"><h4>Price history</h4>${body}${sellerTable(snaps)}</div>`;
+  }
+
+  function buySignal(latest, lo, hi) {
+    if (!(hi > lo)) return "";
+    let text, cls = "";
+    if (latest <= lo * 1.01) { text = "At its lowest recorded price so far. A good time to buy."; cls = "lo"; }
+    else if (latest >= hi * 0.99) { text = "At its highest recorded price so far. Consider waiting."; cls = "hi"; }
+    else { text = `${Math.round((latest - lo) / lo * 100)}% above its lowest recorded price (₹${formatPrice(lo)}).`; }
+    return `<div class="signal ${cls}">${text}</div>`;
   }
 
   function sellerTable(snaps) {
