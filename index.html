@@ -321,6 +321,7 @@
     searchBtn.disabled = true;
     searchBtn.textContent = "Searching...";
     countEl.textContent = "";
+    document.getElementById("insights").innerHTML = "";
     resultsEl.innerHTML = '<div class="loading">Fetching live prices…</div>';
     try {
       const data = await api(`/search?q=${encodeURIComponent(q)}&refresh=${refreshInput.checked}`);
