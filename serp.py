@@ -104,11 +104,15 @@ _STRONG_ACCESSORY_RAW = {
 }
 _STRONG_ACCESSORY_WORDS = {_stem(w) for w in _STRONG_ACCESSORY_RAW}
 
+_HINDI_ACCESSORY_RE = re.compile(r"(?:^|[\s,|/()\-])(?:\u0915\u0935\u0930|\u0915\u0935\u091a|\u092a\u093e\u0909\u091a)(?=$|[\s,|/()\-])")
+
 
 def _is_strong_accessory(query_words: set[str], title: str, seller: str = "") -> bool:
     """Clearly a case/cover/charger/etc. (not a vague word like 'screen' or 'stand')."""
     seller_squashed = re.sub(r"[^a-z0-9.]", "", (seller or "").lower())
     if any(s in seller_squashed for s in _ACCESSORY_ONLY_SELLERS):
+        return True
+    if _HINDI_ACCESSORY_RE.search(title):
         return True
     hit = _significant_words(title) & _STRONG_ACCESSORY_WORDS
     return bool(hit) and not (hit & query_words)
@@ -145,6 +149,8 @@ def _is_accessory(query_words: set[str], title: str, seller: str = "") -> bool:
     if any(s in seller_squashed for s in _ACCESSORY_ONLY_SELLERS):
         return True
     title_words = _significant_words(title)
+    if _HINDI_ACCESSORY_RE.search(title):
+        return True
     accessory_hit = title_words & _ACCESSORY_WORDS
     if not accessory_hit or accessory_hit & query_words:
         return False
