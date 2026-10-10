@@ -319,6 +319,8 @@ def search_shopping(query: str, limit: int = 20) -> list[dict]:
             candidates = (r for r in candidates if r["model_match"])
         if brand_tokens:
             candidates = (r for r in candidates if r["brand_match"])
+        # Never top up with accessories: a case that mentions the product is not the product.
+        candidates = (r for r in candidates if not r["is_accessory"])
         backfill = sorted(candidates, key=lambda r: -r["relevance"])
         pool = pool + backfill[: _MIN_RESULTS - len(pool)]
 
