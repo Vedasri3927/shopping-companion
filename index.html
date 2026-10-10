@@ -501,8 +501,8 @@
     const stats = [
       stat("Listings", currentResults.length),
       tooVaried
-        ? stat("Typical price", fewListings ? "Too few" : "Too varied", "", fewListings ? "Fewer than 3 listings, so a typical price would not be reliable." : "These listings differ too much in size or type for a fair typical price. Try a more specific search.")
-        : stat("Typical price", "₹" + formatPrice(med), "", "Median price across the listings shown"),
+        ? stat("Median price now", fewListings ? "Too few" : "Too varied", "", fewListings ? "Fewer than 3 listings, so a typical price would not be reliable." : "These listings differ too much in size or type for a fair typical price. Try a more specific search.")
+        : stat("Median price now", "₹" + formatPrice(med), "", "Median price across the listings shown"),
       stat("Price range", `₹${formatPrice(Math.min(...prices))} – ₹${formatPrice(Math.max(...prices))}`),
       stat("Good deals", good, good ? "good" : "", `${genuine} genuine deal(s) with a real markdown, ${good - genuine} below the typical price`),
       stat("Red flags", flagged, flagged ? "bad" : "", "Listings with an inflated discount or a suspiciously low price"),
