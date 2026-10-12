@@ -30,6 +30,14 @@ WEIGHTS = {
     "seller": 0.10,    # known retailer / official brand store
 }
 WIDE_SPREAD = 6.0  # if p90/p10 of compared prices exceeds this, listings are mixed sizes/types
+# When the search names a specific model ("cmf buds pro 2", "boat airdopes 141") the search
+# layer has already filtered to that model, so a wide overall spread often means a few mis-listed,
+# import-marked-up or odd-priced listings, not a mix of different products. In that case, if the
+# MIDDLE HALF of the prices is still tight (p75/p25 within this limit), the search is judged
+# normally and the extremes get their own verdicts ("Above typical", "Suspiciously low").
+# This can only relax the strict rule above, never make it harsher.
+WIDE_SPREAD_CORE = 3.0
+MIN_LISTINGS_CORE = 6  # need this many listings before trusting a middle-half measure
 UNIT_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(kgs?|kilograms?|grams?|gms?|g|ml|ltrs?|litres?|liters?|l)\b", re.I)
 COUNT_RE = re.compile(r"(\d+)\s*(pcs|pc|pieces?|units?|count|tablets?|capsules?|sheets?|sticks?|bags?)\b", re.I)
 PACK_RE = re.compile(r"(?:pack|set|combo)\s*of\s*(\d+)", re.I)
@@ -81,6 +89,12 @@ def money(n):
 
 def query_key(query):
     return " ".join(re.findall(r"[a-z0-9]+", (query or "").lower()))
+
+
+def is_model_specific(query):
+    """True if the query names a model/spec (has a number), ignoring a price cap like 'under 1000'."""
+    q = re.sub(r"\b(?:under|below|upto|up to)\s*(?:rs\.?|₹)?\s*\d[\d,]*", " ", (query or "").lower())
+    return any(any(c.isdigit() for c in t) for t in re.findall(r"[a-z0-9]+", q))
 
 
 def is_used(item):
@@ -325,6 +339,9 @@ def score_results(query, items, record=True):
         n = len(sp)
         p10, p90 = sp[int(0.1 * (n - 1))], sp[int(round(0.9 * (n - 1)))]
         wide = p10 > 0 and p90 / p10 > WIDE_SPREAD
+        if wide and n >= MIN_LISTINGS_CORE and is_model_specific(query):
+            p25, p75 = sp[int(0.25 * (n - 1))], sp[int(round(0.75 * (n - 1)))]
+            wide = p25 > 0 and p75 / p25 > WIDE_SPREAD_CORE  # tight middle half -> not wide after all
 
     hist_key = query_key(query) + (":" + mode_unit if mode_unit else "")
     history = get_history(hist_key)  # read BEFORE recording this search
