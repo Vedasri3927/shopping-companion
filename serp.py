@@ -108,7 +108,7 @@ _BRAND_WORDS_RAW = {
     # AND (via the word-based model lock) require exact variant words like
     # "pro"/"max" to actually be present, not just "iphone 18".
     "iphone", "galaxy", "macbook", "ipad", "airpods",
-    "canon", "nikon", "gopro",
+    "canon", "nikon", "gopro", "miniso",
 }
 _BRAND_WORDS = {_stem(w) for w in _BRAND_WORDS_RAW}
 
@@ -418,7 +418,7 @@ def search_shopping(query: str, limit: int = 20, trace: list | None = None) -> l
     # "gaming laptop" or "wireless earbuds".
     if match_brands:
         brand_ok = [r for r in pool if r["brand_match"]]
-        pool = brand_ok if brand_ok else pool
+        pool = brand_ok if (brand_ok or not (brand_tokens and all(len(x) >= 4 for x in brand_tokens))) else []
 
     # 3. Prefer the actual product over its accessories.
     non_accessory = [r for r in pool if not r["is_accessory"]]
