@@ -583,7 +583,7 @@
       row("Verdict", items.map(r => (r.deal_verdict ? `<span class="verdict v-${slug(r.deal_verdict)}">${escapeHtml(r.deal_verdict)}</span>` : "—"))),
       row("Why", items.map(r => `<span class="reason" style="max-width:none">${escapeHtml(r.deal_reason || "")}</span>`)),
       ...factorRows,
-      row("Warranty", items.map(r => escapeHtml(r.warranty || "—"))),
+      row("Warranty terms", items.map(r => escapeHtml(r.warranty || "—"))),
     ].join("");
     compareBodyEl.innerHTML = `<table class="cmp-table"><thead>${head}</thead><tbody>${rows}</tbody></table>
       <p class="note">Highlighted cells show the best value in each row. A factor marked n/a had no data, so it was left out of that product's score rather than counted as zero.</p>`;
